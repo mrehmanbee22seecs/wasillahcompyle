@@ -117,7 +117,11 @@ const LeaderboardPage: React.FC = () => {
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 bg-vibrant-orange rounded-full flex items-center justify-center">
                   {userData?.photoURL ? (
-                    <img src={userData.photoURL} alt="Profile" className="w-full h-full rounded-full object-cover" />
+                    <img 
+                      src={userData.photoURL} 
+                      alt={`Profile picture of ${userData?.displayName || 'user'}`} 
+                      className="w-full h-full rounded-full object-cover" 
+                    />
                   ) : (
                     <span className="text-2xl font-bold">{(userData?.displayName || 'U').charAt(0)}</span>
                   )}

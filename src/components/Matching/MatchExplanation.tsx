@@ -104,6 +104,7 @@ const MatchExplanation: React.FC<MatchExplanationProps> = ({
             <button 
               onClick={onClose}
               className="p-2 hover:bg-white/20 rounded-full transition-colors"
+              aria-label="Close match explanation"
             >
               <X className="w-6 h-6 text-white" />
             </button>
