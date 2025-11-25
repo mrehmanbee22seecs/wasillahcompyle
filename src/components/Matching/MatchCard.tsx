@@ -15,6 +15,7 @@ const MatchCard: React.FC<MatchCardProps> = ({ match }) => {
       <ProjectCard
         project={{ ...project, matchScore: factors.totalScore as any }}
         matchScore={factors.totalScore}
+        matchFactors={factors}
         showMatchScore={true}
       />
       <div className="bg-white rounded-xl border border-gray-100 p-3 shadow-sm">

@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Trophy } from 'lucide-react';
+import { Trophy, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { subscribeToLeaderboard, UserPointsStats } from '../../services/gamificationService';
 
 type Scope = 'global' | 'monthly' | 'role';
 
 const Leaderboard: React.FC = () => {
-  const { userData } = useAuth();
+  const { userData, currentUser } = useAuth();
   const [scope, setScope] = useState<Scope>('global');
   const [rows, setRows] = useState<UserPointsStats[]>([]);
   const [roleFilter, setRoleFilter] = useState<string | null>(null);
@@ -59,29 +60,44 @@ const Leaderboard: React.FC = () => {
         <p className="text-xs text-gray-600">No leaderboard data yet.</p>
       ) : (
         <div className="space-y-1 text-[11px]">
-          {rows.map((row, idx) => (
-            <div
-              key={row.userId}
-              className="flex items-center justify-between py-1 border-b border-gray-50 last:border-b-0"
-            >
-              <div className="flex items-center gap-2">
-                <span className="w-5 text-center font-semibold">
-                  {idx + 1}
-                </span>
-                <span className="font-medium text-logo-navy">
-                  {row.displayName || 'User'}
-                </span>
-                <span className="text-[10px] text-gray-500 uppercase">
-                  {row.role}
-                </span>
+          {rows.map((row, idx) => {
+            const isCurrentUser = currentUser?.uid === row.userId;
+            return (
+              <div
+                key={row.userId}
+                className={`flex items-center justify-between py-1.5 px-2 rounded ${
+                  isCurrentUser ? 'bg-vibrant-orange/10 border border-vibrant-orange/30' : 'border-b border-gray-50 last:border-b-0'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className={`w-5 text-center font-semibold ${isCurrentUser ? 'text-vibrant-orange' : ''}`}>
+                    {idx + 1}
+                  </span>
+                  <span className={`font-medium ${isCurrentUser ? 'text-vibrant-orange' : 'text-logo-navy'}`}>
+                    {row.displayName || 'User'}
+                    {isCurrentUser && <span className="ml-1 text-[9px] bg-vibrant-orange text-white px-1 rounded">You</span>}
+                  </span>
+                  <span className="text-[10px] text-gray-500 uppercase">
+                    {row.role}
+                  </span>
+                </div>
+                <div className={`text-[11px] font-semibold ${isCurrentUser ? 'text-vibrant-orange' : 'text-logo-navy'}`}>
+                  {scope === 'monthly' ? row.monthlyPoints : row.totalPoints} pts
+                </div>
               </div>
-              <div className="text-[11px] text-logo-navy font-semibold">
-                {scope === 'monthly' ? row.monthlyPoints : row.totalPoints} pts
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
+      
+      {/* View Full Leaderboard Link */}
+      <Link 
+        to="/leaderboard" 
+        className="mt-4 flex items-center justify-center gap-2 w-full py-2 text-xs font-semibold text-vibrant-orange hover:bg-vibrant-orange/10 rounded-lg transition-colors"
+      >
+        View Full Leaderboard
+        <ArrowRight className="w-3 h-3" />
+      </Link>
     </section>
   );
 };

@@ -1,6 +1,7 @@
 /**
  * ProjectCard Component
  * Displays a project card with bookmarking, match score, and interactive features
+ * Enhanced for Phase 1 Feature Exposure - better match score visibility
  */
 
 import React, { useState } from 'react';
@@ -17,15 +18,19 @@ import {
   Clock,
   Target,
   TrendingUp,
-  Award
+  Award,
+  Info
 } from 'lucide-react';
 import { ProjectSubmission } from '../types/submissions';
 import { useBookmarks } from '../hooks/useBookmarks';
 import { useAuth } from '../contexts/AuthContext';
+import { MatchingFactors } from '../utils/matchingAlgorithm';
+import MatchExplanation from './Matching/MatchExplanation';
 
 interface ProjectCardProps {
   project: ProjectSubmission;
   matchScore?: number;
+  matchFactors?: MatchingFactors;
   showMatchScore?: boolean;
   onBookmarkChange?: (projectId: string, isBookmarked: boolean) => void;
   variant?: 'default' | 'compact' | 'detailed';
@@ -34,6 +39,7 @@ interface ProjectCardProps {
 const ProjectCard: React.FC<ProjectCardProps> = ({
   project,
   matchScore,
+  matchFactors,
   showMatchScore = false,
   onBookmarkChange,
   variant = 'default',
@@ -42,6 +48,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const { isBookmarked, toggleBookmark, addBookmarkNote } = useBookmarks();
   const [isBookmarking, setIsBookmarking] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [showMatchExplanation, setShowMatchExplanation] = useState(false);
 
   const bookmarked = isBookmarked(project.id);
 
@@ -248,29 +255,47 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     );
   }
 
-  return (
-    <Link
-      to={`/projects/${project.id}`}
-      className="luxury-card bg-white rounded-luxury-lg shadow-xl overflow-hidden floating-card magnetic-element group border-2 border-logo-navy/10 hover:border-vibrant-orange/50 transition-all duration-300 relative"
-    >
-      {/* Match Score Badge */}
-      {showMatchScore && matchScore !== undefined && matchScore > 0 && (
-        <div className="absolute top-4 left-4 z-10 bg-vibrant-orange text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
-          <Star className="w-3 h-3 fill-white" />
-          {Math.round(matchScore)}% Match
-        </div>
-      )}
+  const handleMatchInfoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowMatchExplanation(true);
+  };
 
-      {/* Status and Actions */}
-      <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
-        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(actualStatus)} shadow-lg`}>
-          {getStatusText(actualStatus)}
-        </span>
-        {currentUser && (
-          <>
-            <button
-              onClick={handleBookmarkToggle}
-              disabled={isBookmarking}
+  return (
+    <>
+      <Link
+        to={`/projects/${project.id}`}
+        className="luxury-card bg-white rounded-luxury-lg shadow-xl overflow-hidden floating-card magnetic-element group border-2 border-logo-navy/10 hover:border-vibrant-orange/50 transition-all duration-300 relative"
+      >
+        {/* Match Score Badge - Enhanced with info button */}
+        {showMatchScore && matchScore !== undefined && matchScore > 0 && (
+          <div className="absolute top-4 left-4 z-10 flex items-center gap-1">
+            <div className="bg-vibrant-orange text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
+              <Star className="w-3 h-3 fill-white" />
+              {Math.round(matchScore)}% Match
+            </div>
+            {matchFactors && (
+              <button
+                onClick={handleMatchInfoClick}
+                className="bg-white/90 backdrop-blur-sm text-vibrant-orange p-1.5 rounded-full shadow-lg hover:bg-white transition-colors"
+                title="Why this match?"
+              >
+                <Info className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Status and Actions */}
+        <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+          <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(actualStatus)} shadow-lg`}>
+            {getStatusText(actualStatus)}
+          </span>
+          {currentUser && (
+            <>
+              <button
+                onClick={handleBookmarkToggle}
+                disabled={isBookmarking}
               className="bg-white/90 backdrop-blur-sm rounded-full p-2 hover:bg-vibrant-orange/20 transition-colors shadow-lg"
               title={bookmarked ? 'Remove bookmark' : 'Bookmark'}
             >
@@ -429,7 +454,18 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           </div>
         </div>
       </div>
-    </Link>
+      </Link>
+
+      {/* Match Explanation Modal */}
+      {matchFactors && (
+        <MatchExplanation
+          factors={matchFactors}
+          isOpen={showMatchExplanation}
+          onClose={() => setShowMatchExplanation(false)}
+          projectTitle={project.title}
+        />
+      )}
+    </>
   );
 };
 
