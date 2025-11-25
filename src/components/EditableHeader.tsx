@@ -47,6 +47,7 @@ const EditableHeader = () => {
     { name: t('navigation.projects'), href: '/projects' },
     { name: t('navigation.events'), href: '/events' },
     { name: 'Leaderboard', href: '/leaderboard' },
+    { name: 'My Analytics', href: '/my-analytics' },
     { name: t('navigation.volunteer'), href: '/volunteer' },
     { name: t('navigation.contact'), href: '/contact' },
     { name: t('navigation.upgrade'), href: '/upgrade' },
@@ -86,7 +87,8 @@ const EditableHeader = () => {
             {/* FIXED: Desktop Navigation with proper visibility */}
             <div className="hidden lg:flex items-center space-x-2">
               {navigation.map((item) => (
-                (item.name === 'Dashboard' && (isGuest || !currentUser)) ? null : (
+                // Hide Dashboard and My Analytics for guests and unauthenticated users
+                ((item.name === 'Dashboard' || item.name === 'My Analytics') && (isGuest || !currentUser)) ? null : (
                   <Link
                     key={item.name}
                     to={item.href}
@@ -218,19 +220,22 @@ const EditableHeader = () => {
             <div className="lg:hidden animate-fade-in-down">
               <div className="px-4 pt-4 pb-6 space-y-2 bg-logo-navy-light rounded-2xl mt-4 border-2 border-logo-teal/50 shadow-2xl">
                 {navigation.map((item, index) => (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`block px-5 py-3.5 rounded-xl text-base font-bold transition-all duration-300 transform active:scale-95 ${
-                      location.pathname === item.href
-                        ? 'text-white bg-vibrant-orange shadow-md'
-                        : 'text-cream-elegant hover:text-white hover:bg-logo-teal hover:translate-x-2'
-                    }`}
-                    style={{ animationDelay: `${index * 50}ms` }}
-                  >
-                    {item.name}
-                  </Link>
+                  // Hide Dashboard and My Analytics for guests and unauthenticated users (mobile)
+                  ((item.name === 'Dashboard' || item.name === 'My Analytics') && (isGuest || !currentUser)) ? null : (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      onClick={() => setIsMenuOpen(false)}
+                      className={`block px-5 py-3.5 rounded-xl text-base font-bold transition-all duration-300 transform active:scale-95 ${
+                        location.pathname === item.href
+                          ? 'text-white bg-vibrant-orange shadow-md'
+                          : 'text-cream-elegant hover:text-white hover:bg-logo-teal hover:translate-x-2'
+                      }`}
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      {item.name}
+                    </Link>
+                  )
                 ))}
 
                 {isAdmin && (

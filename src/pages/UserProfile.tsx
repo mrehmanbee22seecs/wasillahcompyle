@@ -12,6 +12,7 @@ import Comments from '../components/Social/Comments';
 import FollowerStats from '../components/Social/FollowerStats';
 import ActivityFeed from '../components/Social/ActivityFeed';
 import ImpactDashboard from '../components/Gamification/ImpactDashboard';
+import VolunteerPortfolio from '../components/Volunteer/VolunteerPortfolio';
 
 const UserProfilePage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -274,6 +275,11 @@ const UserProfilePage: React.FC = () => {
               </section>
             )}
 
+            {/* Volunteer Portfolio - Phase 2 Enhancement */}
+            {effectiveUid && (
+              <VolunteerPortfolio userId={effectiveUid} variant="compact" />
+            )}
+
             {/* Gamified impact - show leaderboard on own profile only */}
             {effectiveUid && (
               <ImpactDashboard userId={effectiveUid} showLeaderboard={isOwnProfile} />
@@ -285,12 +291,20 @@ const UserProfilePage: React.FC = () => {
                   This is your public profile. Update your details from your dashboard to customize
                   how others see you.
                 </p>
-                <Link 
-                  to="/dashboard" 
-                  className="block text-center text-xs font-medium text-vibrant-orange hover:underline"
-                >
-                  Edit Profile Settings
-                </Link>
+                <div className="flex justify-center gap-4">
+                  <Link 
+                    to="/dashboard" 
+                    className="text-xs font-medium text-vibrant-orange hover:underline"
+                  >
+                    Edit Profile
+                  </Link>
+                  <Link 
+                    to="/my-analytics" 
+                    className="text-xs font-medium text-logo-teal hover:underline"
+                  >
+                    View Full Analytics
+                  </Link>
+                </div>
               </div>
             )}
           </div>

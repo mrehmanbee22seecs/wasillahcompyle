@@ -30,6 +30,7 @@ import DonationManagement from './pages/DonationManagement';
 import MyDonations from './pages/MyDonations';
 import Analytics from './pages/Analytics';
 import LeaderboardPage from './pages/LeaderboardPage';
+import PersonalAnalyticsDashboard from './components/Analytics/PersonalAnalyticsDashboard';
 import TranslationEditor from './components/Admin/TranslationEditor';
 import ChatWidget from './components/ChatWidget';
 import DonationWidget from './components/DonationWidget';
@@ -90,6 +91,7 @@ const AppContent = () => {
           <Route path="/donations/manage" element={<DonationManagement />} />
           <Route path="/donations/my" element={<MyDonations />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/my-analytics" element={<PersonalAnalyticsDashboard />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/admin/translations" element={<TranslationEditor />} />
         </Routes>
