@@ -9,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import Likes from '../components/Social/Likes';
 import ShareButton from '../components/Social/ShareButton';
 import Comments from '../components/Social/Comments';
+import AddToCalendar from '../components/Integrations/AddToCalendar';
 
 const EventDetail = () => {
   const { id } = useParams();
@@ -571,6 +572,19 @@ const EventDetail = () => {
               <div className="flex flex-wrap items-center gap-3 mb-4">
                 <Likes targetType="event" targetId={id || null} />
                 <ShareButton variant="button" />
+                {/* Phase 3: Calendar Integration */}
+                {displayEvent.date && (
+                  <AddToCalendar
+                    event={{
+                      title: displayEvent.title,
+                      description: displayEvent.description,
+                      location: displayEvent.location,
+                      startDate: parseEventDateTime(displayEvent.date, displayEvent.time?.split(' - ')[0] || '09:00 AM'),
+                      endDate: parseEventDateTime(displayEvent.date, displayEvent.time?.split(' - ')[1] || '05:00 PM')
+                    }}
+                    variant="dropdown"
+                  />
+                )}
               </div>
 
               {displayEvent.affiliation && displayEvent.affiliation.name && (
