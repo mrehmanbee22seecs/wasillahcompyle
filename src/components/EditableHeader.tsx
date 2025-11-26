@@ -48,6 +48,7 @@ const EditableHeader = () => {
     { name: t('navigation.events'), href: '/events' },
     { name: 'Leaderboard', href: '/leaderboard' },
     { name: 'My Analytics', href: '/my-analytics' },
+    { name: 'Integrations', href: '/integrations' },
     { name: t('navigation.volunteer'), href: '/volunteer' },
     { name: t('navigation.contact'), href: '/contact' },
     { name: t('navigation.upgrade'), href: '/upgrade' },
@@ -87,8 +88,8 @@ const EditableHeader = () => {
             {/* FIXED: Desktop Navigation with proper visibility */}
             <div className="hidden lg:flex items-center space-x-2">
               {navigation.map((item) => (
-                // Hide Dashboard and My Analytics for guests and unauthenticated users
-                ((item.name === 'Dashboard' || item.name === 'My Analytics') && (isGuest || !currentUser)) ? null : (
+                // Hide Dashboard, My Analytics, and Integrations for guests and unauthenticated users
+                ((item.name === 'Dashboard' || item.name === 'My Analytics' || item.name === 'Integrations') && (isGuest || !currentUser)) ? null : (
                   <Link
                     key={item.name}
                     to={item.href}
@@ -220,8 +221,8 @@ const EditableHeader = () => {
             <div className="lg:hidden animate-fade-in-down">
               <div className="px-4 pt-4 pb-6 space-y-2 bg-logo-navy-light rounded-2xl mt-4 border-2 border-logo-teal/50 shadow-2xl">
                 {navigation.map((item, index) => (
-                  // Hide Dashboard and My Analytics for guests and unauthenticated users (mobile)
-                  ((item.name === 'Dashboard' || item.name === 'My Analytics') && (isGuest || !currentUser)) ? null : (
+                  // Hide Dashboard, My Analytics, and Integrations for guests and unauthenticated users (mobile)
+                  ((item.name === 'Dashboard' || item.name === 'My Analytics' || item.name === 'Integrations') && (isGuest || !currentUser)) ? null : (
                     <Link
                       key={item.name}
                       to={item.href}

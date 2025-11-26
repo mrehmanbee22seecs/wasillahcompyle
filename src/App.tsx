@@ -40,6 +40,7 @@ import ScrollToTop from './components/ScrollToTop';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { PWAUpdatePrompt } from './components/PWAUpdatePrompt';
 import { OfflineIndicator } from './components/OfflineIndicator';
+import MobileAppBanner from './components/Mobile/MobileAppBanner';
 import { useActivityLogger } from './hooks/useActivityLogger';
 import { setupMigrationTools } from './utils/runMigration';
 import { initScrollReveal } from './utils/scrollReveal';
@@ -105,6 +106,7 @@ const AppContent = () => {
       <PWAInstallPrompt />
       <PWAUpdatePrompt />
       <OfflineIndicator />
+      <MobileAppBanner />
     </div>
   );
 };
