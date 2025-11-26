@@ -78,9 +78,23 @@ const SocialSharePanel: React.FC<SocialSharePanelProps> = ({
   const [copied, setCopied] = useState(false);
   const [shareCount, setShareCount] = useState<Record<string, boolean>>({});
 
+  useEffect(() => {
+    const timers = Object.keys(shareCount)
+      .filter(key => shareCount[key])
+      .map(platformId => {
+        return setTimeout(() => {
+          setShareCount(prev => ({ ...prev, [platformId]: false }));
+        }, 2000);
+      });
+
+    return () => {
+      timers.forEach(timerId => clearTimeout(timerId));
+    };
+  }, [shareCount]);
+
   const handleShare = async (platformId: string) => {
     let shareUrl = '';
-    
+  
     switch (platformId) {
       case 'whatsapp':
         shareUrl = shareUrls.whatsapp(url, title);
@@ -100,17 +114,14 @@ const SocialSharePanel: React.FC<SocialSharePanelProps> = ({
       default:
         return;
     }
-    
+  
     window.open(shareUrl, '_blank', 'noopener,noreferrer,width=600,height=400');
-    
+  
     // Track share
     trackShare(platformId, contentType, contentId);
-    
+  
     // Show confirmation
     setShareCount(prev => ({ ...prev, [platformId]: true }));
-    setTimeout(() => {
-      setShareCount(prev => ({ ...prev, [platformId]: false }));
-    }, 2000);
   };
 
   const handleNativeShare = async () => {
