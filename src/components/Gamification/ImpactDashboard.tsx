@@ -29,8 +29,8 @@ const ImpactDashboard: React.FC<ImpactDashboardProps> = ({ userId, showLeaderboa
     const unsubPoints = subscribeToUserPoints(effectiveUserId, setEntries);
     const unsubStats = subscribeToUserStats(effectiveUserId, setStats);
     return () => {
-      unsubPoints();
-      unsubStats();
+      if (typeof unsubPoints === 'function') unsubPoints();
+      if (typeof unsubStats === 'function') unsubStats();
     };
   }, [effectiveUserId]);
 
