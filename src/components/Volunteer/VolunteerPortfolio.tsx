@@ -159,9 +159,16 @@ const VolunteerPortfolio: React.FC<PortfolioProps> = ({
         const tempInput = document.createElement('input');
         tempInput.value = shareUrl;
         document.body.appendChild(tempInput);
-        tempInput.select();
-        document.execCommand('copy');
-        document.body.removeChild(tempInput);
+        try {
+          tempInput.select();
+          if (typeof document.execCommand === 'function') {
+            document.execCommand('copy');
+          } else {
+            throw new Error('Copy command unavailable');
+          }
+        } finally {
+          document.body.removeChild(tempInput);
+        }
       }
       // TODO: replace with toast/snackbar state
       console.info('Portfolio link copied to clipboard');
