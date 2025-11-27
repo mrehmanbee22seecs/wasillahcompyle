@@ -202,11 +202,31 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
 
   const formatTimeAgo = (timestamp: any) => {
     if (!timestamp) return 'Recently';
-    
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+
+    let date: Date | null = null;
+    try {
+      if (timestamp?.toDate && typeof timestamp.toDate === 'function') {
+        date = timestamp.toDate();
+      } else if (typeof timestamp === 'number') {
+        // treat as ms since epoch or seconds if small
+        date = new Date(timestamp < 1e12 ? timestamp * 1000 : timestamp);
+      } else if (typeof timestamp === 'string') {
+        const parsed = new Date(timestamp);
+        date = isNaN(parsed.getTime()) ? null : parsed;
+      } else if (timestamp instanceof Date) {
+        date = isNaN(timestamp.getTime()) ? null : timestamp;
+      }
+    } catch {
+      date = null;
+    }
+
+    if (!date) return 'Recently';
+
     const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-    
+    const diffMs = now.getTime() - date.getTime();
+    if (!isFinite(diffMs) || diffMs < 0) return 'Recently';
+
+    const diffInMinutes = Math.floor(diffMs / (1000 * 60));
     if (diffInMinutes < 1) return 'Just now';
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
