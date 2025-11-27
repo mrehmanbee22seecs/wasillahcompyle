@@ -51,12 +51,55 @@ const PersonalAnalyticsDashboard: React.FC = () => {
   const [skillProgress, setSkillProgress] = useState<SkillProgress[]>([]);
   const [timeRange, setTimeRange] = useState<'month' | 'quarter' | 'year'>('month');
 
+  // Calculate date range based on timeRange selection
+  const getDateRange = (range: 'month' | 'quarter' | 'year'): { start: Date; end: Date; monthLabels: string[] } => {
+    const end = new Date();
+    const start = new Date();
+    let monthLabels: string[] = [];
+    
+    switch (range) {
+      case 'month':
+        start.setMonth(end.getMonth() - 1);
+        monthLabels = getMonthLabels(1);
+        break;
+      case 'quarter':
+        start.setMonth(end.getMonth() - 3);
+        monthLabels = getMonthLabels(3);
+        break;
+      case 'year':
+        start.setFullYear(end.getFullYear() - 1);
+        monthLabels = getMonthLabels(12);
+        break;
+    }
+    
+    return { start, end, monthLabels };
+  };
+  
+  // Get month labels for the selected range
+  const getMonthLabels = (months: number): string[] => {
+    const labels: string[] = [];
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const now = new Date();
+    
+    for (let i = months - 1; i >= 0; i--) {
+      const date = new Date(now);
+      date.setMonth(now.getMonth() - i);
+      labels.push(monthNames[date.getMonth()]);
+    }
+    
+    return labels;
+  };
+
   useEffect(() => {
     if (!currentUser?.uid) return;
     
     const loadPersonalStats = async () => {
       try {
         setLoading(true);
+        
+        // Get date range based on selected time range
+        const { start: startDate, monthLabels } = getDateRange(timeRange);
+        const startTimestamp = startDate.getTime();
         
         // Fetch projects where user is participant
         const projectsQuery = query(
@@ -70,9 +113,25 @@ const PersonalAnalyticsDashboard: React.FC = () => {
         let totalHours = 0;
         let totalImpacted = 0;
         const skillsUsed = new Map<string, number>();
+        const monthlyData = new Map<string, { hours: number; projects: number }>();
+        
+        // Initialize monthly data
+        monthLabels.forEach(month => {
+          monthlyData.set(month, { hours: 0, projects: 0 });
+        });
         
         projectsSnap.forEach(doc => {
           const project = doc.data();
+          
+          // Filter by time range if project has a date
+          const projectDate = project.createdAt?.toDate?.() || project.startDate?.toDate?.() || new Date();
+          const projectTimestamp = projectDate.getTime();
+          
+          // Skip projects outside the selected time range
+          if (projectTimestamp < startTimestamp) {
+            return;
+          }
+          
           totalProjects++;
           
           if (project.status === 'completed') {
@@ -87,19 +146,38 @@ const PersonalAnalyticsDashboard: React.FC = () => {
           }
           
           // Estimate hours (default 8 per project if not specified)
-          totalHours += project.durationEstimate || 8;
+          const hours = project.durationEstimate || 8;
+          totalHours += hours;
           
           // Track impact
           totalImpacted += project.peopleImpacted || 0;
+          
+          // Track monthly activity
+          const monthName = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][projectDate.getMonth()];
+          if (monthlyData.has(monthName)) {
+            const current = monthlyData.get(monthName)!;
+            monthlyData.set(monthName, {
+              hours: current.hours + hours,
+              projects: current.projects + 1
+            });
+          }
         });
         
-        // Fetch events attended
+        // Fetch events attended (filter by time range)
         const eventsQuery = query(
           collection(db, 'event_registrations'),
           where('userId', '==', currentUser.uid)
         );
         const eventsSnap = await getDocs(eventsQuery);
-        const eventsAttended = eventsSnap.size;
+        
+        let eventsAttended = 0;
+        eventsSnap.forEach(doc => {
+          const event = doc.data();
+          const eventDate = event.registeredAt?.toDate?.() || event.createdAt?.toDate?.() || new Date();
+          if (eventDate.getTime() >= startTimestamp) {
+            eventsAttended++;
+          }
+        });
         
         // Build skill progress from skills used
         const skillProgressData: SkillProgress[] = [];
@@ -112,8 +190,12 @@ const PersonalAnalyticsDashboard: React.FC = () => {
         });
         skillProgressData.sort((a, b) => b.projectsUsed - a.projectsUsed);
         
-        // Generate monthly activity (simplified)
-        const monthlyActivity = generateMonthlyActivity(totalHours, totalProjects);
+        // Convert monthly data to array
+        const monthlyActivity = monthLabels.map(month => ({
+          month,
+          hours: monthlyData.get(month)?.hours || 0,
+          projects: monthlyData.get(month)?.projects || 0
+        }));
         
         setStats({
           projectsJoined: totalProjects,
@@ -139,48 +221,9 @@ const PersonalAnalyticsDashboard: React.FC = () => {
     // Subscribe to points stats
     const unsubPoints = subscribeToUserStats(currentUser.uid, setPointsStats);
     return () => unsubPoints();
-  }, [currentUser?.uid]);
+  }, [currentUser?.uid, timeRange]);
 
-  // Generate mock monthly activity data
-  const generateMonthlyActivity = (totalHours: number, totalProjects: number) => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-    const distribution = [0.1, 0.15, 0.2, 0.15, 0.2, 0.2];
 
-    // Initial rounded allocations
-    const hoursAlloc = distribution.map(d => Math.floor(totalHours * d));
-    const projAlloc = distribution.map(d => Math.floor(totalProjects * d));
-
-    // Distribute remainders to ensure sums match totals
-    let hoursRemainder = totalHours - hoursAlloc.reduce((a, b) => a + b, 0);
-    let projRemainder = totalProjects - projAlloc.reduce((a, b) => a + b, 0);
-
-    // Distribute to largest fractional parts first
-    const fracIdx = distribution
-      .map((d, i) => ({ i, frac: (totalHours * d) % 1 }))
-      .sort((a, b) => b.frac - a.frac)
-      .map(x => x.i);
-    for (const i of fracIdx) {
-      if (hoursRemainder <= 0) break;
-      hoursAlloc[i] += 1;
-      hoursRemainder -= 1;
-    }
-
-    const fracIdxP = distribution
-      .map((d, i) => ({ i, frac: (totalProjects * d) % 1 }))
-      .sort((a, b) => b.frac - a.frac)
-      .map(x => x.i);
-    for (const i of fracIdxP) {
-      if (projRemainder <= 0) break;
-      projAlloc[i] += 1;
-      projRemainder -= 1;
-    }
-
-    return months.map((month, idx) => ({
-      month,
-      hours: hoursAlloc[idx],
-      projects: projAlloc[idx],
-    }));
-  };
 
   const impactLevel = useMemo(() => {
     if (!stats) return { level: 'Newcomer', color: 'text-gray-500', next: 10 };
