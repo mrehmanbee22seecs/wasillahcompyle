@@ -82,6 +82,16 @@ const AddToCalendar: React.FC<AddToCalendarProps> = ({
   };
 
   const handleAddToCalendar = (providerId: string) => {
+    const { startDate, endDate, title } = calendarEvent;
+    if (!(startDate instanceof Date) || isNaN(startDate.getTime()) ||
+        !(endDate instanceof Date) || isNaN(endDate.getTime()) ||
+        endDate <= startDate) {
+      console.error('Invalid event dates for calendar export');
+      // Optional: surface lightweight UI feedback
+      setAddedTo(null);
+      return;
+    }
+
     switch (providerId) {
       case 'google':
         window.open(generateGoogleCalendarLink(calendarEvent), '_blank', 'noopener,noreferrer');
@@ -96,14 +106,13 @@ const AddToCalendar: React.FC<AddToCalendarProps> = ({
         downloadICalFile(calendarEvent);
         break;
     }
-    
+
     setAddedTo(providerId);
-    setTimeout(() => setAddedTo(null), 2000);
-    
-    // Track analytics
+    const timeoutId = window.setTimeout(() => setAddedTo(null), 2000);
+
     if (typeof window !== 'undefined' && (window as any).gtag) {
       (window as any).gtag('event', 'add_to_calendar', {
-        event_title: event.title,
+        event_title: title,
         calendar_provider: providerId,
       });
     }
