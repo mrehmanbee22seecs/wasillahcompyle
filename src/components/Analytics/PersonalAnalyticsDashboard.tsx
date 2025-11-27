@@ -145,11 +145,40 @@ const PersonalAnalyticsDashboard: React.FC = () => {
   const generateMonthlyActivity = (totalHours: number, totalProjects: number) => {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
     const distribution = [0.1, 0.15, 0.2, 0.15, 0.2, 0.2];
-    
+
+    // Initial rounded allocations
+    const hoursAlloc = distribution.map(d => Math.floor(totalHours * d));
+    const projAlloc = distribution.map(d => Math.floor(totalProjects * d));
+
+    // Distribute remainders to ensure sums match totals
+    let hoursRemainder = totalHours - hoursAlloc.reduce((a, b) => a + b, 0);
+    let projRemainder = totalProjects - projAlloc.reduce((a, b) => a + b, 0);
+
+    // Distribute to largest fractional parts first
+    const fracIdx = distribution
+      .map((d, i) => ({ i, frac: (totalHours * d) % 1 }))
+      .sort((a, b) => b.frac - a.frac)
+      .map(x => x.i);
+    for (const i of fracIdx) {
+      if (hoursRemainder <= 0) break;
+      hoursAlloc[i] += 1;
+      hoursRemainder -= 1;
+    }
+
+    const fracIdxP = distribution
+      .map((d, i) => ({ i, frac: (totalProjects * d) % 1 }))
+      .sort((a, b) => b.frac - a.frac)
+      .map(x => x.i);
+    for (const i of fracIdxP) {
+      if (projRemainder <= 0) break;
+      projAlloc[i] += 1;
+      projRemainder -= 1;
+    }
+
     return months.map((month, idx) => ({
       month,
-      hours: Math.round(totalHours * distribution[idx]),
-      projects: Math.round(totalProjects * distribution[idx])
+      hours: hoursAlloc[idx],
+      projects: projAlloc[idx],
     }));
   };
 
