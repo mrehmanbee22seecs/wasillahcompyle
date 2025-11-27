@@ -142,44 +142,49 @@ const PersonalAnalyticsDashboard: React.FC = () => {
           if (Array.isArray(project.requiredSkills)) {
             project.requiredSkills.forEach((skill: string) => {
               skillsUsed.set(skill, (skillsUsed.get(skill) || 0) + 1);
-            });
-          }
-          
-          // Estimate hours (default 8 per project if not specified)
-          const hours = project.durationEstimate || 8;
-          totalHours += hours;
-          
-          // Track impact
-          totalImpacted += project.peopleImpacted || 0;
-          
-          // Track monthly activity
-          const monthName = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][projectDate.getMonth()];
-          if (monthlyData.has(monthName)) {
-            const current = monthlyData.get(monthName)!;
-            monthlyData.set(monthName, {
-              hours: current.hours + hours,
-              projects: current.projects + 1
-            });
-          }
-        });
-        
-        // Fetch events attended (filter by time range)
-        const eventsQuery = query(
-          collection(db, 'event_registrations'),
-          where('userId', '==', currentUser.uid)
-        );
-        const eventsSnap = await getDocs(eventsQuery);
-        
-        let eventsAttended = 0;
-        eventsSnap.forEach(doc => {
-          const event = doc.data();
-          const eventDate = event.registeredAt?.toDate?.() || event.createdAt?.toDate?.() || new Date();
-          if (eventDate.getTime() >= startTimestamp) {
-            eventsAttended++;
-          }
-        });
-        
-        // Build skill progress from skills used
+            const generateMonthlyActivity = (totalHours: number, totalProjects: number) => {
+              // Sanitize inputs to avoid NaN/Infinity/negative values
+              const safeHours = Number.isFinite(totalHours) ? Math.max(0, Math.floor(totalHours)) : 0;
+              const safeProjects = Number.isFinite(totalProjects) ? Math.max(0, Math.floor(totalProjects)) : 0;
+
+              const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+              const distribution = [0.1, 0.15, 0.2, 0.15, 0.2, 0.2];
+
+              const hoursAlloc = distribution.map(d => Math.floor(safeHours * d));
+              const projAlloc = distribution.map(d => Math.floor(safeProjects * d));
+
+              let hoursRemainder = safeHours - hoursAlloc.reduce((a, b) => a + b, 0);
+              let projRemainder = safeProjects - projAlloc.reduce((a, b) => a + b, 0);
+
+              const fracIdx = distribution
+                .map((d, i) => ({ i, frac: (safeHours * d) % 1 }))
+                .sort((a, b) => b.frac - a.frac)
+                .map(x => x.i);
+              for (const i of fracIdx) {
+                if (hoursRemainder <= 0) break;
+                if (i >= 0 && i < hoursAlloc.length) {
+                  hoursAlloc[i] += 1;
+                  hoursRemainder -= 1;
+                }
+              }
+
+              const fracIdxP = distribution
+                .map((d, i) => ({ i, frac: (safeProjects * d) % 1 }))
+                .sort((a, b) => b.frac - a.frac)
+                .map(x => x.i);
+              for (const i of fracIdxP) {
+                if (projRemainder <= 0) break;
+                if (i >= 0 && i < projAlloc.length) {
+                  projAlloc[i] += 1;
+                  projRemainder -= 1;
+                }
+              }
+
+              return months.map((month, idx) => ({
+                month,
+                hours: hoursAlloc[idx] ?? 0,
+                projects: projAlloc[idx] ?? 0,
+              }));
         const skillProgressData: SkillProgress[] = [];
         skillsUsed.forEach((count, skill) => {
           skillProgressData.push({
