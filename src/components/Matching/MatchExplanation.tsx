@@ -24,15 +24,15 @@ const MatchExplanation: React.FC<MatchExplanationProps> = ({
   if (!isOpen) return null;
 
   const {
-    totalScore,
-    skillsScore,
-    interestsScore,
-    locationScore,
-    availabilityScore,
-    experienceScore,
-    reasons,
-    improvementSuggestions
-  } = factors;
+    totalScore = 0,
+    skillsScore = 0,
+    interestsScore = 0,
+    locationScore = 0,
+    availabilityScore = 0,
+    experienceScore = 0,
+    reasons = [],
+    improvementSuggestions = []
+  } = factors || {};
 
   const getScoreColor = (score: number, max: number) => {
     const percentage = (score / max) * 100;
