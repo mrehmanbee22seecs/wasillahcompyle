@@ -135,18 +135,38 @@ const VolunteerPortfolio: React.FC<PortfolioProps> = ({
     };
   }, [effectiveUserId]);
 
-  const handleShare = () => {
+  const handleShare = async () => {
     const shareUrl = `${window.location.origin}/u/${effectiveUserId}`;
-    
+
     if (navigator.share) {
-      navigator.share({
-        title: 'My Wasilah Volunteer Portfolio',
-        text: 'Check out my volunteer impact at Wasilah!',
-        url: shareUrl
-      }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(shareUrl);
-      alert('Portfolio link copied to clipboard!');
+      try {
+        await navigator.share({
+          title: 'My Wasilah Volunteer Portfolio',
+          text: 'Check out my volunteer impact at Wasilah!',
+          url: shareUrl
+        });
+      } catch {
+        // user cancelled or share failed; silently ignore
+      }
+      return;
+    }
+
+    // Fallback copy logic with robust error handling
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const tempInput = document.createElement('input');
+        tempInput.value = shareUrl;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+      }
+      // TODO: replace with toast/snackbar state
+      console.info('Portfolio link copied to clipboard');
+    } catch (e) {
+      console.error('Failed to copy share link', e);
     }
   };
 
