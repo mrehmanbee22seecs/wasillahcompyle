@@ -83,32 +83,46 @@ const AddToCalendar: React.FC<AddToCalendarProps> = ({
 
   const handleAddToCalendar = (providerId: string) => {
     const { startDate, endDate, title } = calendarEvent;
-    if (!(startDate instanceof Date) || isNaN(startDate.getTime()) ||
-        !(endDate instanceof Date) || isNaN(endDate.getTime()) ||
-        endDate <= startDate) {
+    if (
+      !(startDate instanceof Date) || isNaN(startDate.getTime()) ||
+      !(endDate instanceof Date) || isNaN(endDate.getTime()) ||
+      endDate <= startDate
+    ) {
       console.error('Invalid event dates for calendar export');
-      // Optional: surface lightweight UI feedback
       setAddedTo(null);
       return;
     }
 
+    const openSafe = (url: string) => {
+      if (typeof window === 'undefined') return false;
+      const win = window.open(url, '_blank', 'noopener,noreferrer');
+      return !!win;
+    };
+
+    let success = false;
     switch (providerId) {
       case 'google':
-        window.open(generateGoogleCalendarLink(calendarEvent), '_blank', 'noopener,noreferrer');
+        success = openSafe(generateGoogleCalendarLink(calendarEvent));
         break;
       case 'outlook':
-        window.open(generateOutlookCalendarLink(calendarEvent), '_blank', 'noopener,noreferrer');
+        success = openSafe(generateOutlookCalendarLink(calendarEvent));
         break;
       case 'yahoo':
-        window.open(generateYahooCalendarLink(calendarEvent), '_blank', 'noopener,noreferrer');
+        success = openSafe(generateYahooCalendarLink(calendarEvent));
         break;
       case 'ical':
         downloadICalFile(calendarEvent);
+        success = true;
         break;
+      default:
+        console.warn('Unknown calendar provider:', providerId);
+        return;
     }
 
-    setAddedTo(providerId);
-    setTimeout(() => setAddedTo(null), 2000);
+    if (success) {
+      setAddedTo(providerId);
+      setTimeout(() => setAddedTo(null), 2000);
+    }
 
     if (typeof window !== 'undefined' && (window as any).gtag) {
       (window as any).gtag('event', 'add_to_calendar', {
