@@ -90,6 +90,15 @@ const AddToCalendar: React.FC<AddToCalendarProps> = ({
       // Optional: surface lightweight UI feedback
       setAddedTo(null);
       return;
+  const handleAddToCalendar = (providerId: string) => {
+    const { startDate, endDate, title } = calendarEvent;
+    if (!(startDate instanceof Date) || isNaN(startDate.getTime()) ||
+        !(endDate instanceof Date) || isNaN(endDate.getTime()) ||
+        endDate <= startDate) {
+      console.error('Invalid event dates for calendar export');
+      // Optional: surface lightweight UI feedback
+      setAddedTo(null);
+      return;
     }
 
     switch (providerId) {
