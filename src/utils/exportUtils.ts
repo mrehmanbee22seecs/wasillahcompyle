@@ -120,14 +120,14 @@ export const exportToJSON = (
 
 /**
  * Export data to Excel format (simplified - returns CSV for now)
- * For full Excel support, integrate xlsx library
+ * ExcelJS is used in the Admin components for proper Excel export
  */
 export const exportToExcel = (
   data: any[],
   options: ExportOptions = {}
 ): string => {
   // For now, return CSV format which can be opened in Excel
-  // In production, use xlsx library for true .xlsx format
+  // Admin components use ExcelJS for true .xlsx format
   return exportToCSV(data, options);
 };
 
