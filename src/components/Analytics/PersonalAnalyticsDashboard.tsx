@@ -146,9 +146,13 @@ const PersonalAnalyticsDashboard: React.FC = () => {
             });
           }
           
-          // Accumulate hours and impact
-          const hours = project.hoursVolunteered || project.estimatedHours || 0;
+          const rawHours = project.hoursVolunteered ?? project.estimatedHours ?? 0;
+          const hours = Number.isFinite(Number(rawHours)) ? Math.max(0, Number(rawHours)) : 0;
           totalHours += hours;
+
+          const rawImpact = project.impactCount ?? project.participantIds?.length ?? 0;
+          const impact = Number.isFinite(Number(rawImpact)) ? Math.max(0, Number(rawImpact)) : 0;
+          totalImpacted += impact;
           totalImpacted += project.impactCount || project.participantIds?.length || 0;
           
           // Track monthly activity
