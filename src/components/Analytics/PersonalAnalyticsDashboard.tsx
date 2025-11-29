@@ -24,7 +24,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../config/firebase';
-import { subscribeToUserStats, UserPointsStats } from '../../services/gamificationService';
+import { subscribeToUserStats, subscribeToAchievements, UserPointsStats, Achievement } from '../../services/gamificationService';
 
 interface PersonalStats {
   projectsJoined: number;
@@ -50,6 +50,7 @@ const PersonalAnalyticsDashboard: React.FC = () => {
   const [pointsStats, setPointsStats] = useState<UserPointsStats | null>(null);
   const [skillProgress, setSkillProgress] = useState<SkillProgress[]>([]);
   const [timeRange, setTimeRange] = useState<'month' | 'quarter' | 'year'>('month');
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
 
   // Calculate date range based on timeRange selection
   const getDateRange = (range: 'month' | 'quarter' | 'year'): { start: Date; end: Date; monthLabels: string[] } => {
@@ -222,7 +223,14 @@ const PersonalAnalyticsDashboard: React.FC = () => {
     
     // Subscribe to points stats
     const unsubPoints = subscribeToUserStats(currentUser.uid, setPointsStats);
-    return () => unsubPoints();
+    
+    // Subscribe to backend achievements
+    const unsubAchievements = subscribeToAchievements(currentUser.uid, setAchievements);
+    
+    return () => {
+      unsubPoints();
+      unsubAchievements();
+    };
   }, [currentUser?.uid, timeRange]);
 
 
@@ -432,31 +440,32 @@ const PersonalAnalyticsDashboard: React.FC = () => {
             <Star className="w-5 h-5 text-yellow-500" />
             Recent Achievements
           </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { name: 'First Project', icon: '🎯', earned: (stats?.projectsJoined || 0) >= 1 },
-              { name: '5 Projects', icon: '⭐', earned: (stats?.projectsJoined || 0) >= 5 },
-              { name: '10 Hours', icon: '⏰', earned: (stats?.hoursVolunteered || 0) >= 10 },
-              { name: 'Team Player', icon: '🤝', earned: (stats?.projectsCompleted || 0) >= 3 },
-            ].map((achievement) => (
-              <div
-                key={achievement.name}
-                className={`p-4 rounded-xl text-center ${
-                  achievement.earned
-                    ? 'bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-200'
-                    : 'bg-gray-50 border-2 border-gray-100 opacity-50'
-                }`}
-              >
-                <div className="text-3xl mb-2">{achievement.icon}</div>
-                <div className={`text-sm font-medium ${achievement.earned ? 'text-logo-navy' : 'text-gray-400'}`}>
-                  {achievement.name}
-                </div>
-                {achievement.earned && (
+          {achievements.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="text-4xl mb-3">🏆</div>
+              <p className="text-gray-500 text-sm">
+                Complete projects and participate in events to earn achievements!
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {achievements.slice(0, 8).map((achievement) => (
+                <div
+                  key={achievement.id}
+                  className="p-4 rounded-xl text-center bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-200"
+                >
+                  <div className="text-3xl mb-2">🏆</div>
+                  <div className="text-sm font-medium text-logo-navy">
+                    {achievement.name}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1 line-clamp-2">
+                    {achievement.description}
+                  </div>
                   <div className="text-xs text-green-600 mt-1">✓ Earned</div>
-                )}
-              </div>
-            ))}
-          </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Quick Actions */}
