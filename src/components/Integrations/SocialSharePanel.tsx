@@ -114,14 +114,14 @@ const SocialSharePanel: React.FC<SocialSharePanelProps> = ({
         break;
       case 'twitter':
         shareUrl = shareUrls.twitter(url, title);
-        break;
-      case 'linkedin':
-        shareUrl = shareUrls.linkedin(url);
-        break;
-      case 'email':
-        shareUrl = shareUrls.email(title, description, url);
-        break;
-      default:
+
+          if (typeof window === 'undefined') return;
+          const win = window.open(shareUrl, '_blank', 'noopener,noreferrer,width=600,height=400');
+          const opened = !!win;
+          if (!opened) return;
+
+          trackShare(platformId, contentType, contentId);
+          setShareCount(prev => ({ ...prev, [platformId]: true }));
         return;
     }
   
