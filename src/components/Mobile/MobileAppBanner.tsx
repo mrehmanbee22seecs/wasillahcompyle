@@ -4,7 +4,7 @@
  * Zero cost - uses native browser PWA capabilities
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Smartphone, 
   X, 
@@ -31,6 +31,16 @@ const MobileAppBanner: React.FC<MobileAppBannerProps> = ({
   const [installing, setInstalling] = useState(false);
   const [installed, setInstalled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const dismissTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (dismissTimeoutRef.current) {
+        clearTimeout(dismissTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     // Check if we're on a mobile device (guard for SSR)
@@ -68,7 +78,11 @@ const MobileAppBanner: React.FC<MobileAppBannerProps> = ({
     setInstalling(false);
     if (success) {
       setInstalled(true);
-      setTimeout(() => setDismissed(true), 3000);
+      // Clear any existing timeout before setting a new one
+      if (dismissTimeoutRef.current) {
+        clearTimeout(dismissTimeoutRef.current);
+      }
+      dismissTimeoutRef.current = setTimeout(() => setDismissed(true), 3000);
     }
   };
 
