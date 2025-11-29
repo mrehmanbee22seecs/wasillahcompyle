@@ -161,7 +161,6 @@ const PersonalAnalyticsDashboard: React.FC = () => {
           const rawImpact = project.impactCount ?? project.participantIds?.length ?? 0;
           const impact = Number.isFinite(Number(rawImpact)) ? Math.max(0, Number(rawImpact)) : 0;
           totalImpacted += impact;
-          totalImpacted += project.impactCount || project.participantIds?.length || 0;
           
           // Track monthly activity
           const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
