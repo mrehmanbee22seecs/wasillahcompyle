@@ -19,7 +19,8 @@ import {
   ChevronRight,
   Check,
   Settings,
-  ArrowLeft
+  ArrowLeft,
+  LogIn
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import NotificationSettings from '../components/Integrations/NotificationSettings';
@@ -162,6 +163,23 @@ const IntegrationsHub: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const categories = Object.keys(categoryInfo) as Array<keyof typeof categoryInfo>;
+
+  // Authentication guard - unauthenticated users should see sign-in message
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen bg-cream-white pt-28 pb-12 flex items-center justify-center">
+        <div className="text-center">
+          <Plug className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-logo-navy mb-2">Sign In Required</h2>
+          <p className="text-gray-600 mb-4">Please sign in to access your integration settings.</p>
+          <Link to="/volunteer" className="text-vibrant-orange hover:underline flex items-center justify-center gap-2">
+            <LogIn className="w-4 h-4" />
+            Join Wasilah →
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const getStatusBadge = (status: Integration['status']) => {
     switch (status) {
