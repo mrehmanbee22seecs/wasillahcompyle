@@ -24,41 +24,41 @@ const FollowerStats: React.FC<FollowerStatsProps> = ({ userId, variant = 'compac
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
     const loadStats = async () => {
       if (!userId) {
-        setLoading(false);
+        if (isMounted) setLoading(false);
         return;
       }
-
       try {
-        setLoading(true);
-
-        // Get followers count (people following this user)
-        const followersQuery = query(
+        if (isMounted) setLoading(true);
+        const followersQueryRef = query(
           collection(db, 'user_follows'),
           where('followedId', '==', userId)
         );
-        const followersSnap = await getDocs(followersQuery);
-
-        // Get following count (people this user follows)
-        const followingQuery = query(
+        const followingQueryRef = query(
           collection(db, 'user_follows'),
           where('followerId', '==', userId)
         );
-        const followingSnap = await getDocs(followingQuery);
-
+        const [followersSnap, followingSnap] = await Promise.all([
+          getDocs(followersQueryRef),
+          getDocs(followingQueryRef),
+        ]);
+        if (!isMounted) return;
         setStats({
           followers: followersSnap.size,
-          following: followingSnap.size
+          following: followingSnap.size,
         });
       } catch (error) {
-        console.error('Error loading follower stats:', error);
+        if (isMounted) console.error('Error loading follower stats:', error);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
-
     loadStats();
+    return () => {
+      isMounted = false;
+    };
   }, [userId]);
 
   if (loading) {
