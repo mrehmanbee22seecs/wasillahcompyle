@@ -4,7 +4,7 @@
  * Uses browser Notification API and Firebase Cloud Messaging (free tier)
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Bell, 
   BellOff, 
@@ -88,6 +88,18 @@ const NotificationSettings: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [testSent, setTestSent] = useState(false);
+  
+  // Ref to track timeout for cleanup
+  const testSentTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeout on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (testSentTimeoutRef.current) {
+        clearTimeout(testSentTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Load notification permission status
   useEffect(() => {
@@ -177,7 +189,11 @@ const NotificationSettings: React.FC = () => {
         badge: '/logo.jpeg'
       });
       setTestSent(true);
-      setTimeout(() => setTestSent(false), 3000);
+      // Clear any existing timeout before setting a new one
+      if (testSentTimeoutRef.current) {
+        clearTimeout(testSentTimeoutRef.current);
+      }
+      testSentTimeoutRef.current = setTimeout(() => setTestSent(false), 3000);
     }
   };
 
