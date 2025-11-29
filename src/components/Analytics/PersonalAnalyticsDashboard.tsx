@@ -82,7 +82,6 @@ const PersonalAnalyticsDashboard: React.FC = () => {
     end.setHours(23, 59, 59, 999);
 
     return { start, end, monthLabels };
-    return { start, end, monthLabels };
   };
   
   // Get month labels for the selected range

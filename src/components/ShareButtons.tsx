@@ -3,7 +3,7 @@
  * Social media sharing buttons for projects and events
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { ShareableContent, SocialPlatform } from '../types/integrations';
 import { openShareLink, copyToClipboard, shareViaWebAPI, canUseWebShare } from '../utils/socialSharing';
 
@@ -22,6 +22,16 @@ export const ShareButtons: React.FC<ShareButtonsProps> = ({
 }) => {
   const [copied, setCopied] = useState(false);
   const [showAllPlatforms, setShowAllPlatforms] = useState(false);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current) {
+        clearTimeout(copyTimerRef.current);
+      }
+    };
+  }, []);
 
   const sizeClasses = {
     small: 'w-8 h-8 text-sm',
@@ -37,7 +47,11 @@ export const ShareButtons: React.FC<ShareButtonsProps> = ({
     const success = await copyToClipboard(content.url);
     if (success) {
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      // Clear any existing timer before setting a new one
+      if (copyTimerRef.current) {
+        clearTimeout(copyTimerRef.current);
+      }
+      copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
     }
   };
 
