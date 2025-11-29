@@ -237,17 +237,8 @@ const PersonalAnalyticsDashboard: React.FC = () => {
     return { level: 'Newcomer', color: 'text-gray-600', next: 5 };
   }, [stats]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-cream-white pt-28 pb-12 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-vibrant-orange mx-auto mb-4" />
-          <p className="text-logo-navy">Loading your analytics...</p>
-        </div>
-      </div>
-    );
-  }
-
+  // Check currentUser first - unauthenticated users should see sign-in message
+  // This must come before loading check since loading only becomes false inside loadPersonalStats
   if (!currentUser) {
     return (
       <div className="min-h-screen bg-cream-white pt-28 pb-12 flex items-center justify-center">
@@ -258,6 +249,17 @@ const PersonalAnalyticsDashboard: React.FC = () => {
           <Link to="/volunteer" className="text-vibrant-orange hover:underline">
             Join Wasilah →
           </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-cream-white pt-28 pb-12 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-vibrant-orange mx-auto mb-4" />
+          <p className="text-logo-navy">Loading your analytics...</p>
         </div>
       </div>
     );
