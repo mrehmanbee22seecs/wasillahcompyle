@@ -41,21 +41,26 @@ interface ActivityFeedProps {
   variant?: 'global' | 'personal';
   maxItems?: number;
   showTitle?: boolean;
+  userId?: string; // Optional: show activity for a specific user (useful when viewing another user's profile)
 }
 
 const ActivityFeed: React.FC<ActivityFeedProps> = ({ 
   variant = 'global', 
   maxItems = 10,
-  showTitle = true 
+  showTitle = true,
+  userId
 }) => {
   const { currentUser } = useAuth();
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Use provided userId or fall back to currentUser's uid
+  const effectiveUserId = userId || currentUser?.uid;
+
   useEffect(() => {
     const loadActivities = async () => {
-      // Skip loading for personal variant if user is not logged in
-      if (variant === 'personal' && !currentUser?.uid) {
+      // Skip loading for personal variant if no user ID is available
+      if (variant === 'personal' && !effectiveUserId) {
         setLoading(false);
         return;
       }
@@ -67,10 +72,10 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
 
         // Load recent points earned (most engaging activity type)
         // Use user-specific query for personal variant to filter at query level
-        const pointsQuery = variant === 'personal' && currentUser?.uid
+        const pointsQuery = variant === 'personal' && effectiveUserId
           ? query(
               collection(db, 'user_points'),
-              where('userId', '==', currentUser.uid),
+              where('userId', '==', effectiveUserId),
               orderBy('createdAt', 'desc'),
               limit(queryLimit)
             )
@@ -94,10 +99,10 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
         });
 
         // Load recent achievements
-        const achievementsQuery = variant === 'personal' && currentUser?.uid
+        const achievementsQuery = variant === 'personal' && effectiveUserId
           ? query(
               collection(db, 'user_achievements'),
-              where('userId', '==', currentUser.uid),
+              where('userId', '==', effectiveUserId),
               orderBy('earnedAt', 'desc'),
               limit(queryLimit)
             )
@@ -164,7 +169,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
     };
 
     loadActivities();
-  }, [variant, maxItems, currentUser?.uid]);
+  }, [variant, maxItems, effectiveUserId]);
 
   const getActivityIcon = (type: ActivityItem['type']) => {
     switch (type) {

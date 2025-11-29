@@ -233,7 +233,7 @@ const UserProfilePage: React.FC = () => {
             </section>
 
             {/* Activity Feed - User's recent activity */}
-            <ActivityFeed variant="personal" maxItems={8} />
+            <ActivityFeed variant="personal" maxItems={8} userId={effectiveUid} />
 
             {/* Comments on profile */}
             <section className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-logo-navy/10">
