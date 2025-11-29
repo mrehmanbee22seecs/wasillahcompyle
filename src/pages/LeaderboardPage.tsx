@@ -79,10 +79,35 @@ const LeaderboardPage: React.FC = () => {
   const userRank = getUserRank();
 
   const getRankIcon = (rank: number) => {
-    if (rank === 1) return <Crown className="w-6 h-6 text-yellow-500" />;
-    if (rank === 2) return <Medal className="w-6 h-6 text-gray-400" />;
-    if (rank === 3) return <Medal className="w-6 h-6 text-amber-600" />;
-    return <span className="w-6 h-6 flex items-center justify-center text-sm font-bold text-gray-600">#{rank}</span>;
+    if (rank === 1) {
+      return (
+        <span aria-label="Rank 1" role="img">
+          <Crown className="w-6 h-6 text-yellow-500" />
+        </span>
+      );
+    }
+    if (rank === 2) {
+      return (
+        <span aria-label="Rank 2" role="img">
+          <Medal className="w-6 h-6 text-gray-400" />
+        </span>
+      );
+    }
+    if (rank === 3) {
+      return (
+        <span aria-label="Rank 3" role="img">
+          <Medal className="w-6 h-6 text-amber-600" />
+        </span>
+      );
+    }
+    return (
+      <span
+        className="w-6 h-6 flex items-center justify-center text-sm font-bold text-gray-600"
+        aria-label={`Rank ${rank}`}
+      >
+        #{rank}
+      </span>
+    );
   };
 
   const getRankBgColor = (rank: number) => {
