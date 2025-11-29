@@ -20,9 +20,11 @@ import {
   Check,
   Settings,
   ArrowLeft,
-  LogIn
+  LogIn,
+  Download
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { usePWA } from '../hooks/usePWA';
 import NotificationSettings from '../components/Integrations/NotificationSettings';
 
 interface Integration {
@@ -159,8 +161,16 @@ const categoryInfo = {
 
 const IntegrationsHub: React.FC = () => {
   const { currentUser } = useAuth();
+  const { isInstallable, isInstalled, installPWA } = usePWA();
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [installing, setInstalling] = useState(false);
+
+  const handleInstallPWA = async () => {
+    setInstalling(true);
+    await installPWA();
+    setInstalling(false);
+  };
 
   const categories = Object.keys(categoryInfo) as Array<keyof typeof categoryInfo>;
 
@@ -330,7 +340,7 @@ const IntegrationsHub: React.FC = () => {
 
         {/* PWA Install Banner */}
         <div className="mt-8 bg-gradient-to-r from-logo-navy to-logo-navy-light rounded-2xl p-6 text-white">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
                 <Smartphone className="w-7 h-7" />
@@ -342,13 +352,33 @@ const IntegrationsHub: React.FC = () => {
                 </p>
               </div>
             </div>
-            <Link
-              to="/dashboard"
-              className="px-6 py-3 bg-white text-logo-navy rounded-xl font-medium hover:bg-gray-100 transition-colors flex items-center gap-2"
-            >
-              Learn More
-              <ExternalLink className="w-4 h-4" />
-            </Link>
+            {isInstalled ? (
+              <span className="px-6 py-3 bg-green-500 text-white rounded-xl font-medium flex items-center gap-2">
+                <Check className="w-5 h-5" />
+                Installed
+              </span>
+            ) : isInstallable ? (
+              <button
+                onClick={handleInstallPWA}
+                disabled={installing}
+                className="px-6 py-3 bg-white text-logo-navy rounded-xl font-medium hover:bg-gray-100 transition-colors flex items-center gap-2 disabled:opacity-50"
+                aria-label="Install Wasilah App"
+              >
+                {installing ? (
+                  'Installing...'
+                ) : (
+                  <>
+                    <Download className="w-5 h-5" />
+                    Install App
+                  </>
+                )}
+              </button>
+            ) : (
+              <div className="text-sm text-white/70 max-w-xs">
+                <p className="font-medium text-white mb-1">Manual Installation:</p>
+                <p>Use your browser's menu → "Add to Home Screen" or "Install App"</p>
+              </div>
+            )}
           </div>
         </div>
 
