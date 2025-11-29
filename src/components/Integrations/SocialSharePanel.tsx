@@ -4,7 +4,7 @@
  * Zero cost - uses client-side share URLs and Web Share API
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Share2, 
   Copy, 
@@ -77,6 +77,16 @@ const SocialSharePanel: React.FC<SocialSharePanelProps> = ({
 }) => {
   const [copied, setCopied] = useState(false);
   const [shareCount, setShareCount] = useState<Record<string, boolean>>({});
+  const copyTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current) {
+        clearTimeout(copyTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const timers = Object.keys(shareCount)
@@ -137,7 +147,11 @@ const SocialSharePanel: React.FC<SocialSharePanelProps> = ({
     if (success) {
       setCopied(true);
       trackShare('copy_link', contentType, contentId);
-      setTimeout(() => setCopied(false), 2000);
+      // Clear any existing timer before setting a new one
+      if (copyTimerRef.current) {
+        clearTimeout(copyTimerRef.current);
+      }
+      copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
     }
   };
 
