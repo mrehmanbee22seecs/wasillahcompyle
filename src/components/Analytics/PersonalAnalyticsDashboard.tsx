@@ -52,27 +52,36 @@ const PersonalAnalyticsDashboard: React.FC = () => {
   const [timeRange, setTimeRange] = useState<'month' | 'quarter' | 'year'>('month');
   const [achievements, setAchievements] = useState<Achievement[]>([]);
 
-  // Calculate date range based on timeRange selection
-  const getDateRange = (range: 'month' | 'quarter' | 'year'): { start: Date; end: Date; monthLabels: string[] } => {
+  const getDateRange = (
+    range: 'month' | 'quarter' | 'year'
+  ): { start: Date; end: Date; monthLabels: string[] } => {
     const end = new Date();
-    const start = new Date();
+    const start = new Date(end); // clone to keep day alignment
     let monthLabels: string[] = [];
-    
+
     switch (range) {
-      case 'month':
-        start.setMonth(end.getMonth() - 1);
+      case 'month': {
+        start.setMonth(start.getMonth() - 1);
         monthLabels = getMonthLabels(1);
         break;
-      case 'quarter':
-        start.setMonth(end.getMonth() - 3);
+      }
+      case 'quarter': {
+        start.setMonth(start.getMonth() - 3);
         monthLabels = getMonthLabels(3);
         break;
-      case 'year':
-        start.setFullYear(end.getFullYear() - 1);
+      }
+      case 'year': {
+        start.setFullYear(start.getFullYear() - 1);
         monthLabels = getMonthLabels(12);
         break;
+      }
     }
-    
+
+    // normalize to avoid TZ boundary issues
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+
+    return { start, end, monthLabels };
     return { start, end, monthLabels };
   };
   
