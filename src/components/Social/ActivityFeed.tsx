@@ -180,21 +180,27 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
   };
 
   const getActivityText = (activity: ActivityItem) => {
+    const safeDetails = typeof activity.details === 'string' ? activity.details : '';
+    const safeName = typeof activity.targetName === 'string' ? activity.targetName : 'an item';
+    const safePoints = Number.isFinite(activity.points as number) ? activity.points : 0;
     switch (activity.type) {
       case 'follow':
         return `started following a user`;
       case 'like':
         return `liked a ${activity.targetType || 'post'}`;
-      case 'comment':
-        return `commented: "${activity.details?.substring(0, 50)}${activity.details && activity.details.length > 50 ? '...' : ''}"`;
+      case 'comment': {
+        const preview = safeDetails.substring(0, 50);
+        const suffix = safeDetails.length > 50 ? '...' : '';
+        return `commented: "${preview}${suffix}"`;
+      }
       case 'achievement':
-        return `unlocked achievement: ${activity.targetName}`;
+        return `unlocked achievement: ${safeName}`;
       case 'badge':
-        return `earned badge: ${activity.targetName}`;
+        return `earned badge: ${safeName}`;
       case 'project_join':
         return `joined a project`;
       case 'points':
-        return `earned ${activity.points} points: ${activity.details}`;
+        return `earned ${safePoints} points${safeDetails ? `: ${safeDetails}` : ''}`;
       default:
         return 'performed an action';
     }
