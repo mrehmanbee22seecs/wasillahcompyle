@@ -103,8 +103,10 @@ const SocialSharePanel: React.FC<SocialSharePanelProps> = ({
   }, [shareCount]);
 
   const handleShare = async (platformId: string) => {
+    if (typeof window === 'undefined') return;
+    
     let shareUrl = '';
-  
+
     switch (platformId) {
       case 'whatsapp':
         shareUrl = shareUrls.whatsapp(url, title);
@@ -114,22 +116,23 @@ const SocialSharePanel: React.FC<SocialSharePanelProps> = ({
         break;
       case 'twitter':
         shareUrl = shareUrls.twitter(url, title);
-
-          if (typeof window === 'undefined') return;
-          const win = window.open(shareUrl, '_blank', 'noopener,noreferrer,width=600,height=400');
-          const opened = !!win;
-          if (!opened) return;
-
-          trackShare(platformId, contentType, contentId);
-          setShareCount(prev => ({ ...prev, [platformId]: true }));
+        break;
+      case 'linkedin':
+        shareUrl = shareUrls.linkedin(url);
+        break;
+      case 'email':
+        shareUrl = shareUrls.email(title, description, url);
+        break;
+      default:
         return;
     }
-  
-    window.open(shareUrl, '_blank', 'noopener,noreferrer,width=600,height=400');
-  
+
+    const popup = window.open(shareUrl, '_blank', 'noopener,noreferrer,width=600,height=400');
+    if (!popup) return;
+
     // Track share
     trackShare(platformId, contentType, contentId);
-  
+
     // Show confirmation
     setShareCount(prev => ({ ...prev, [platformId]: true }));
   };
