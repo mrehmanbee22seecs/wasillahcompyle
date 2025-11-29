@@ -207,32 +207,36 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
   };
 
   const formatTimeAgo = (timestamp: any) => {
-    if (!timestamp) return 'Recently';
+            } else if (typeof timestamp === 'number') {
+              date = new Date(timestamp < 1e12 ? timestamp * 1000 : timestamp);
+            } else if (typeof timestamp === 'string') {
+              const parsed = new Date(timestamp);
+              date = isNaN(parsed.getTime()) ? null : parsed;
+            } else if (timestamp instanceof Date) {
+              date = isNaN(timestamp.getTime()) ? null : timestamp;
+            }
+          } catch {
+            date = null;
+          }
 
-    let date: Date | null = null;
-    try {
-      if (timestamp?.toDate && typeof timestamp.toDate === 'function') {
-        date = timestamp.toDate();
-      } else if (typeof timestamp === 'number') {
-        // treat as ms since epoch or seconds if small
-        date = new Date(timestamp < 1e12 ? timestamp * 1000 : timestamp);
-      } else if (typeof timestamp === 'string') {
-        const parsed = new Date(timestamp);
-        date = isNaN(parsed.getTime()) ? null : parsed;
-      } else if (timestamp instanceof Date) {
-        date = isNaN(timestamp.getTime()) ? null : timestamp;
-      }
-    } catch {
-      date = null;
-    }
+          if (!date) return 'Recently';
 
-    if (!date) return 'Recently';
+          const now = new Date();
+          let diffMs = now.getTime() - date.getTime();
+          if (!Number.isFinite(diffMs)) return 'Recently';
+          if (diffMs < 0) diffMs = 0; // clamp future to "Just now"
 
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    if (!isFinite(diffMs) || diffMs < 0) return 'Recently';
-
-    const diffInMinutes = Math.floor(diffMs / (1000 * 60));
+          const diffInMinutes = Math.floor(diffMs / (1000 * 60));
+          if (diffInMinutes < 1) return 'Just now';
+          if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+          if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
+          if (diffInMinutes < 10080) return `${Math.floor(diffInMinutes / 1440)}d ago`;
+          try {
+            return date.toLocaleDateString();
+          } catch {
+            return date.toISOString().slice(0, 10);
+          }
+        };
     if (diffInMinutes < 1) return 'Just now';
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
