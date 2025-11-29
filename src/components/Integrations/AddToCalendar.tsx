@@ -81,6 +81,8 @@ const AddToCalendar: React.FC<AddToCalendarProps> = ({
     endDate: event.endDate
   };
 
+  const timeoutRef = useRef<number | null>(null);
+
   const handleAddToCalendar = (providerId: string) => {
     const { startDate, endDate, title } = calendarEvent;
     if (
@@ -100,28 +102,37 @@ const AddToCalendar: React.FC<AddToCalendarProps> = ({
     };
 
     let success = false;
-    switch (providerId) {
-      case 'google':
-        success = openSafe(generateGoogleCalendarLink(calendarEvent));
-        break;
-      case 'outlook':
-        success = openSafe(generateOutlookCalendarLink(calendarEvent));
-        break;
-      case 'yahoo':
-        success = openSafe(generateYahooCalendarLink(calendarEvent));
-        break;
-      case 'ical':
-        downloadICalFile(calendarEvent);
-        success = true;
-        break;
-      default:
-        console.warn('Unknown calendar provider:', providerId);
-        return;
+    try {
+      switch (providerId) {
+        case 'google':
+          success = openSafe(generateGoogleCalendarLink(calendarEvent));
+          break;
+        case 'outlook':
+          success = openSafe(generateOutlookCalendarLink(calendarEvent));
+          break;
+        case 'yahoo':
+          success = openSafe(generateYahooCalendarLink(calendarEvent));
+          break;
+        case 'ical':
+          downloadICalFile(calendarEvent);
+          success = true;
+          break;
+        default:
+          console.warn('Unknown calendar provider:', providerId);
+          return;
+      }
+    } catch (e) {
+      success = false;
+      console.error('Calendar action failed:', e);
     }
 
     if (success) {
       setAddedTo(providerId);
-      setTimeout(() => setAddedTo(null), 2000);
+      if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
+      timeoutRef.current = window.setTimeout(() => setAddedTo(null), 2000);
+    } else {
+      // Optional: transient failure indicator
+      setAddedTo(null);
     }
 
     if (typeof window !== 'undefined' && (window as any).gtag) {
@@ -131,6 +142,12 @@ const AddToCalendar: React.FC<AddToCalendarProps> = ({
       });
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
+    };
+  }, []);
 
   if (variant === 'compact') {
     return (
