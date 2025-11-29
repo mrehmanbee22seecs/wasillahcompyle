@@ -339,14 +339,12 @@ const PersonalAnalyticsDashboard: React.FC = () => {
             icon={Target}
             label="Projects Joined"
             value={stats?.projectsJoined || 0}
-            trend={+12}
             color="bg-blue-50 text-blue-600"
           />
           <MetricCard
             icon={Award}
             label="Completed"
             value={stats?.projectsCompleted || 0}
-            trend={+8}
             color="bg-green-50 text-green-600"
           />
           <MetricCard
@@ -354,14 +352,12 @@ const PersonalAnalyticsDashboard: React.FC = () => {
             label="Hours Volunteered"
             value={stats?.hoursVolunteered || 0}
             suffix="hrs"
-            trend={+15}
             color="bg-purple-50 text-purple-600"
           />
           <MetricCard
             icon={Heart}
             label="People Impacted"
             value={stats?.peopleImpacted || 0}
-            trend={+20}
             color="bg-red-50 text-red-600"
           />
         </div>
