@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Share2, Link as LinkIcon, MessageCircle, Mail } from 'lucide-react';
 
 interface ShareButtonProps {
@@ -9,6 +9,16 @@ interface ShareButtonProps {
 
 const ShareButton: React.FC<ShareButtonProps> = ({ url, title, variant = 'button' }) => {
   const [copied, setCopied] = useState(false);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current) {
+        clearTimeout(copyTimerRef.current);
+      }
+    };
+  }, []);
 
   const shareUrl =
     url ||
@@ -22,7 +32,11 @@ const ShareButton: React.FC<ShareButtonProps> = ({ url, title, variant = 'button
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      // Clear any existing timer before setting a new one
+      if (copyTimerRef.current) {
+        clearTimeout(copyTimerRef.current);
+      }
+      copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
     } catch {
       setCopied(false);
     }

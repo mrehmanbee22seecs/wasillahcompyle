@@ -8,7 +8,7 @@ import { TrendingUp, Users, Target, Calendar, CheckCircle, XCircle, Clock, Eye, 
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { SubmissionStatus } from '../../types/submissions';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 export interface AnalyticsData {
   // User Statistics
@@ -204,41 +204,53 @@ const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({
     }
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (!analytics) return;
 
     try {
-      const workbook = XLSX.utils.book_new();
+      const workbook = new ExcelJS.Workbook();
       
       // Summary sheet
-      const summaryData = [
-        ['Metric', 'Value'],
-        ['Total Users', analytics.totalUsers],
-        ['New Users This Month', analytics.newUsersThisMonth],
-        ['Active Users', analytics.activeUsers],
-        ['Total Submissions', analytics.totalSubmissions],
-        ['Pending Reviews', analytics.pendingReviews],
-        ['Approval Rate', `${analytics.approvalRate.toFixed(2)}%`],
-        ['Rejection Rate', `${analytics.rejectionRate.toFixed(2)}%`],
-        ['Total Applications', analytics.totalApplications],
-        ['Application Rate', analytics.applicationRate.toFixed(2)],
+      const summarySheet = workbook.addWorksheet('Summary');
+      summarySheet.columns = [
+        { header: 'Metric', key: 'metric', width: 25 },
+        { header: 'Value', key: 'value', width: 20 },
       ];
-      const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
-      XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary');
+      summarySheet.addRows([
+        { metric: 'Total Users', value: analytics.totalUsers },
+        { metric: 'New Users This Month', value: analytics.newUsersThisMonth },
+        { metric: 'Active Users', value: analytics.activeUsers },
+        { metric: 'Total Submissions', value: analytics.totalSubmissions },
+        { metric: 'Pending Reviews', value: analytics.pendingReviews },
+        { metric: 'Approval Rate', value: `${analytics.approvalRate.toFixed(2)}%` },
+        { metric: 'Rejection Rate', value: `${analytics.rejectionRate.toFixed(2)}%` },
+        { metric: 'Total Applications', value: analytics.totalApplications },
+        { metric: 'Application Rate', value: analytics.applicationRate.toFixed(2) },
+      ]);
 
       // Status breakdown
-      const statusData = [
-        ['Status', 'Count'],
-        ['Draft', analytics.submissionsByStatus.draft],
-        ['Pending', analytics.submissionsByStatus.pending],
-        ['Approved', analytics.submissionsByStatus.approved],
-        ['Rejected', analytics.submissionsByStatus.rejected],
-        ['Completed', analytics.submissionsByStatus.completed],
+      const statusSheet = workbook.addWorksheet('Status Breakdown');
+      statusSheet.columns = [
+        { header: 'Status', key: 'status', width: 15 },
+        { header: 'Count', key: 'count', width: 10 },
       ];
-      const statusSheet = XLSX.utils.aoa_to_sheet(statusData);
-      XLSX.utils.book_append_sheet(workbook, statusSheet, 'Status Breakdown');
+      statusSheet.addRows([
+        { status: 'Draft', count: analytics.submissionsByStatus.draft },
+        { status: 'Pending', count: analytics.submissionsByStatus.pending },
+        { status: 'Approved', count: analytics.submissionsByStatus.approved },
+        { status: 'Rejected', count: analytics.submissionsByStatus.rejected },
+        { status: 'Completed', count: analytics.submissionsByStatus.completed },
+      ]);
 
-      XLSX.writeFile(workbook, `analytics_${new Date().toISOString().split('T')[0]}.xlsx`);
+      // Generate buffer and download
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `analytics_${new Date().toISOString().split('T')[0]}.xlsx`;
+      link.click();
+      URL.revokeObjectURL(url);
       if (onExport) onExport();
     } catch (error) {
       console.error('Error exporting analytics:', error);

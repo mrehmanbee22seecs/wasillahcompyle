@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Users, MessageSquare, Mail, Calendar, Target, Settings, CreditCard as Edit3, Save, X, Plus, Trash2, Eye, EyeOff, Download, CheckCircle, XCircle, Clock, FileText, Mail as MailIcon, RefreshCw, Database, ExternalLink, BarChart3 } from 'lucide-react';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { collection, getDocs, doc, getDoc, updateDoc, deleteDoc, addDoc, query, orderBy, where, serverTimestamp } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from '../contexts/AuthContext';
@@ -371,7 +371,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  const exportApplicationsToExcel = () => {
+  const exportApplicationsToExcel = async () => {
     try {
       const dateStr = new Date().toISOString().split('T')[0];
 
@@ -438,21 +438,45 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
         'Submitted': formatTimestamp(v.submittedAt),
       }));
 
-      const wb = XLSX.utils.book_new();
-      const ws1 = XLSX.utils.json_to_sheet(projectRows);
-      const ws2 = XLSX.utils.json_to_sheet(eventRows);
-      const ws3 = XLSX.utils.json_to_sheet(volunteerRows);
-      XLSX.utils.book_append_sheet(wb, ws1, 'Project Users');
-      XLSX.utils.book_append_sheet(wb, ws2, 'Event Users');
-      XLSX.utils.book_append_sheet(wb, ws3, 'Join Us');
-      XLSX.writeFile(wb, `wasilah-applications-${dateStr}.xlsx`);
+      const workbook = new ExcelJS.Workbook();
+      
+      // Add Project Users sheet
+      const ws1 = workbook.addWorksheet('Project Users');
+      if (projectRows.length > 0) {
+        ws1.columns = Object.keys(projectRows[0]).map(key => ({ header: key, key, width: 20 }));
+        ws1.addRows(projectRows);
+      }
+      
+      // Add Event Users sheet
+      const ws2 = workbook.addWorksheet('Event Users');
+      if (eventRows.length > 0) {
+        ws2.columns = Object.keys(eventRows[0]).map(key => ({ header: key, key, width: 20 }));
+        ws2.addRows(eventRows);
+      }
+      
+      // Add Join Us sheet
+      const ws3 = workbook.addWorksheet('Join Us');
+      if (volunteerRows.length > 0) {
+        ws3.columns = Object.keys(volunteerRows[0]).map(key => ({ header: key, key, width: 20 }));
+        ws3.addRows(volunteerRows);
+      }
+      
+      // Generate buffer and download
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `wasilah-applications-${dateStr}.xlsx`;
+      link.click();
+      URL.revokeObjectURL(url);
     } catch (e) {
       console.error('Excel export failed', e);
       alert('Failed to export Excel. See console for details.');
     }
   };
 
-  const exportRegisteredToExcel = () => {
+  const exportRegisteredToExcel = async () => {
     try {
       const dateStr = new Date().toISOString().split('T')[0];
       const rows = newsletterSubscribers.map((n) => ({
@@ -460,10 +484,24 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
         Source: n.source || '',
         Subscribed: formatTimestamp(n.subscribedAt),
       }));
-      const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.json_to_sheet(rows);
-      XLSX.utils.book_append_sheet(wb, ws, 'Registered Users');
-      XLSX.writeFile(wb, `wasilah-registered-users-${dateStr}.xlsx`);
+      
+      const workbook = new ExcelJS.Workbook();
+      const ws = workbook.addWorksheet('Registered Users');
+      
+      if (rows.length > 0) {
+        ws.columns = Object.keys(rows[0]).map(key => ({ header: key, key, width: 25 }));
+        ws.addRows(rows);
+      }
+      
+      // Generate buffer and download
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `wasilah-registered-users-${dateStr}.xlsx`;
+      link.click();
+      URL.revokeObjectURL(url);
     } catch (e) {
       console.error('Registered users export failed', e);
       alert('Failed to export Excel. See console for details.');
@@ -1764,10 +1802,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                 onFilterChange={(criteria) => {
                   setFilterCriteria(criteria);
                 }}
-                onExport={(criteria) => {
+                onExport={async (criteria) => {
                   const filtered = applyFilters(submissions, criteria);
                   try {
-                    const workbook = XLSX.utils.book_new();
+                    const workbook = new ExcelJS.Workbook();
+                    const worksheet = workbook.addWorksheet('Submissions');
                     const worksheetData = filtered.map((item) => ({
                       Type: item.submissionType === 'project' ? 'Project' : 'Event',
                       ID: item.id,
@@ -1781,9 +1820,21 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                       'Submitted At': item.submittedAt?.toDate?.()?.toISOString() || item.submittedAt,
                       'Reviewed At': item.reviewedAt?.toDate?.()?.toISOString() || item.reviewedAt,
                     }));
-                    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
-                    XLSX.utils.book_append_sheet(workbook, worksheet, 'Submissions');
-                    XLSX.writeFile(workbook, `submissions_export_${new Date().toISOString().split('T')[0]}.xlsx`);
+                    
+                    if (worksheetData.length > 0) {
+                      worksheet.columns = Object.keys(worksheetData[0]).map(key => ({ header: key, key, width: 20 }));
+                      worksheet.addRows(worksheetData);
+                    }
+                    
+                    // Generate buffer and download
+                    const buffer = await workbook.xlsx.writeBuffer();
+                    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `submissions_export_${new Date().toISOString().split('T')[0]}.xlsx`;
+                    link.click();
+                    URL.revokeObjectURL(url);
                     alert(`Exported ${filtered.length} submission(s) to Excel`);
                   } catch (error) {
                     console.error('Error exporting:', error);

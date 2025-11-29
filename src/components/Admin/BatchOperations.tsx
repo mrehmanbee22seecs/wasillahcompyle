@@ -9,7 +9,7 @@ import { writeBatch, doc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { SubmissionStatus } from '../../types/submissions';
 import { sendProjectUpdateNotification } from '../../utils/notificationHelpers';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 export interface SelectableItem {
   id: string;
@@ -242,14 +242,15 @@ const BatchOperations: React.FC<BatchOperationsProps> = ({
     );
   };
 
-  const handleBatchExport = () => {
+  const handleBatchExport = async () => {
     if (selectedCount === 0) {
       alert('Please select at least one item to export');
       return;
     }
 
     try {
-      const workbook = XLSX.utils.book_new();
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Submissions');
       const worksheetData = selectedItemsData.map((item) => ({
         Type: item.type === 'project' ? 'Project' : 'Event',
         ID: item.id,
@@ -267,9 +268,20 @@ const BatchOperations: React.FC<BatchOperationsProps> = ({
         'Rejection Reason': item.rejectionReason || '',
       }));
 
-      const worksheet = XLSX.utils.json_to_sheet(worksheetData);
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Submissions');
-      XLSX.writeFile(workbook, `submissions_export_${new Date().toISOString().split('T')[0]}.xlsx`);
+      if (worksheetData.length > 0) {
+        worksheet.columns = Object.keys(worksheetData[0]).map(key => ({ header: key, key, width: 20 }));
+        worksheet.addRows(worksheetData);
+      }
+      
+      // Generate buffer and download
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `submissions_export_${new Date().toISOString().split('T')[0]}.xlsx`;
+      link.click();
+      URL.revokeObjectURL(url);
       alert(`Exported ${selectedCount} item(s) to Excel`);
     } catch (error) {
       console.error('Error exporting:', error);

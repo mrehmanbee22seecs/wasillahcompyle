@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,7 +9,10 @@ import FollowButton from '../components/Social/FollowButton';
 import ShareButton from '../components/Social/ShareButton';
 import Likes from '../components/Social/Likes';
 import Comments from '../components/Social/Comments';
+import FollowerStats from '../components/Social/FollowerStats';
+import ActivityFeed from '../components/Social/ActivityFeed';
 import ImpactDashboard from '../components/Gamification/ImpactDashboard';
+import VolunteerPortfolio from '../components/Volunteer/VolunteerPortfolio';
 
 const UserProfilePage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -131,39 +134,45 @@ const UserProfilePage: React.FC = () => {
     <div className="min-h-screen bg-cream-white pt-24 pb-10">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         {/* Header */}
-        <section className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-logo-navy/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-cream-elegant border border-vibrant-orange/40 overflow-hidden flex items-center justify-center text-2xl font-bold text-logo-navy">
-              {profile.photoURL ? (
-                <img
-                  src={profile.photoURL}
-                  alt={profile.displayName || 'User'}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                (profile.displayName || 'U').charAt(0).toUpperCase()
-              )}
-            </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-modern-display text-logo-navy font-bold">
-                {profile.displayName || 'Community Member'}
-              </h1>
-              <p className="text-xs sm:text-sm text-gray-600">
-                {profile.role ? profile.role.toUpperCase() : 'VOLUNTEER'}
-              </p>
-              {profile.city && (
-                <p className="text-xs text-gray-500">
-                  {profile.city}
-                  {profile.province ? `, ${profile.province}` : ''}
+        <section className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-logo-navy/10">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-cream-elegant border-2 border-vibrant-orange/40 overflow-hidden flex items-center justify-center text-2xl font-bold text-logo-navy">
+                {profile.photoURL ? (
+                  <img
+                    src={profile.photoURL}
+                    alt={profile.displayName || 'User'}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  (profile.displayName || 'U').charAt(0).toUpperCase()
+                )}
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-modern-display text-logo-navy font-bold">
+                  {profile.displayName || 'Community Member'}
+                </h1>
+                <p className="text-xs sm:text-sm text-gray-600">
+                  {profile.role ? profile.role.toUpperCase() : 'VOLUNTEER'}
                 </p>
-              )}
+                {profile.city && (
+                  <p className="text-xs text-gray-500">
+                    {profile.city}
+                    {profile.province ? `, ${profile.province}` : ''}
+                  </p>
+                )}
+                {/* Follower Stats */}
+                <div className="mt-2">
+                  <FollowerStats userId={effectiveUid} variant="compact" />
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div className="flex flex-wrap items-center gap-3 justify-end">
-            <Likes targetType="user" targetId={effectiveUid} />
-            <ShareButton variant="button" />
-            <FollowButton targetUserId={effectiveUid} />
+            <div className="flex flex-wrap items-center gap-3 justify-end">
+              <Likes targetType="user" targetId={effectiveUid} />
+              <ShareButton variant="button" />
+              <FollowButton targetUserId={effectiveUid} />
+            </div>
           </div>
         </section>
 
@@ -223,6 +232,9 @@ const UserProfilePage: React.FC = () => {
               )}
             </section>
 
+            {/* Activity Feed - User's recent activity */}
+            <ActivityFeed variant="personal" maxItems={8} userId={effectiveUid} />
+
             {/* Comments on profile */}
             <section className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-logo-navy/10">
               <Comments targetType="user" targetId={effectiveUid} />
@@ -263,18 +275,37 @@ const UserProfilePage: React.FC = () => {
               </section>
             )}
 
-            {/* Gamified impact */}
+            {/* Volunteer Portfolio - Phase 2 Enhancement */}
             {effectiveUid && (
-              <section className="bg-white rounded-2xl shadow-xl p-4 sm:p-5 border border-logo-navy/10">
-                <ImpactDashboard userId={effectiveUid} />
-              </section>
+              <VolunteerPortfolio userId={effectiveUid} variant="compact" />
+            )}
+
+            {/* Gamified impact - show leaderboard on own profile only */}
+            {effectiveUid && (
+              <ImpactDashboard userId={effectiveUid} showLeaderboard={isOwnProfile} />
             )}
 
             {isOwnProfile && (
-              <p className="text-[11px] text-gray-400 text-center">
-                This is your public profile. Update your details from your dashboard to customize
-                how others see you.
-              </p>
+              <div className="space-y-4">
+                <p className="text-[11px] text-gray-400 text-center">
+                  This is your public profile. Update your details from your dashboard to customize
+                  how others see you.
+                </p>
+                <div className="flex justify-center gap-4">
+                  <Link 
+                    to="/dashboard" 
+                    className="text-xs font-medium text-vibrant-orange hover:underline"
+                  >
+                    Edit Profile
+                  </Link>
+                  <Link 
+                    to="/my-analytics" 
+                    className="text-xs font-medium text-logo-teal hover:underline"
+                  >
+                    View Full Analytics
+                  </Link>
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -284,5 +315,4 @@ const UserProfilePage: React.FC = () => {
 };
 
 export default UserProfilePage;
-
 

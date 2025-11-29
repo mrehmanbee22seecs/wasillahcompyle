@@ -3,20 +3,27 @@ import { Star } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Achievement, subscribeToAchievements } from '../../services/gamificationService';
 
-const Achievements: React.FC = () => {
+interface AchievementsProps {
+  userId?: string;
+}
+
+const Achievements: React.FC<AchievementsProps> = ({ userId }) => {
   const { currentUser } = useAuth();
   const [achievements, setAchievements] = useState<Achievement[]>([]);
 
+  // Use provided userId or fall back to current user
+  const effectiveUserId = userId || currentUser?.uid;
+
   useEffect(() => {
-    if (!currentUser) {
+    if (!effectiveUserId) {
       setAchievements([]);
       return;
     }
-    const unsub = subscribeToAchievements(currentUser.uid, setAchievements);
+    const unsub = subscribeToAchievements(effectiveUserId, setAchievements);
     return () => unsub();
-  }, [currentUser]);
+  }, [effectiveUserId]);
 
-  if (!currentUser) return null;
+  if (!effectiveUserId) return null;
 
   return (
     <section className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 border border-gray-100">

@@ -3,20 +3,27 @@ import { Award } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Badge, subscribeToBadges } from '../../services/gamificationService';
 
-const BadgeSystem: React.FC = () => {
+interface BadgeSystemProps {
+  userId?: string;
+}
+
+const BadgeSystem: React.FC<BadgeSystemProps> = ({ userId }) => {
   const { currentUser } = useAuth();
   const [badges, setBadges] = useState<Badge[]>([]);
 
+  // Use provided userId or fall back to current user
+  const effectiveUserId = userId || currentUser?.uid;
+
   useEffect(() => {
-    if (!currentUser) {
+    if (!effectiveUserId) {
       setBadges([]);
       return;
     }
-    const unsub = subscribeToBadges(currentUser.uid, setBadges);
+    const unsub = subscribeToBadges(effectiveUserId, setBadges);
     return () => unsub();
-  }, [currentUser]);
+  }, [effectiveUserId]);
 
-  if (!currentUser) return null;
+  if (!effectiveUserId) return null;
 
   return (
     <section className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 border border-gray-100">

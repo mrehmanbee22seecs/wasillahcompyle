@@ -7,6 +7,7 @@ import { db } from '../config/firebase';
 import { findBestMatch, formatResponse } from '../utils/kbMatcher';
 import { getEnhancedKB } from '../services/localKbService';
 import ChatWidgetModal from './ChatWidgetModal';
+import ChatQuickActions from './Chat/ChatQuickActions';
 
 interface Message {
   id: string;
@@ -30,6 +31,7 @@ const ChatWidget = () => {
   const [kbPages, setKbPages] = useState<any[]>([]);
   const [suppressButton, setSuppressButton] = useState(false);
   const [rateInfo, setRateInfo] = useState<any>(null);
+  const [recentTopics, setRecentTopics] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -296,7 +298,7 @@ const ChatWidget = () => {
             <div className="flex-1 flex flex-col">
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {messages.length === 0 && (
-                  <div className="text-center text-gray-500 mt-8">
+                  <div className="text-center text-gray-500 mt-4">
                     <div className="relative inline-block mb-3">
                       <MessageCircle className="w-12 h-12 opacity-30" />
                       {hasIntelligentKb && (<Sparkles className="w-5 h-5 absolute -top-1 -right-1 text-yellow-500 animate-pulse" />)}
@@ -304,30 +306,29 @@ const ChatWidget = () => {
                     <p className="text-sm font-semibold">Welcome to Wasilah Assistant!</p>
                     <p className="text-xs mt-1">{hasIntelligentKb ? '🤖 Ask me anything - I learn from our website!' : 'How can we help you today?'}</p>
                     
-                    {/* Bot Capabilities & Limitations */}
-                    <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200 max-w-md mx-auto text-left">
-                      <p className="text-xs font-semibold text-blue-900 mb-2">ℹ️ What I can help with:</p>
-                      <ul className="text-xs text-blue-800 space-y-1">
-                        <li>• Information about Wasilah projects & events</li>
-                        <li>• Volunteering opportunities & how to join</li>
-                        <li>• Contact information & office locations</li>
-                        <li>• General questions about our mission</li>
-                      </ul>
-                      <p className="text-xs font-semibold text-blue-900 mt-3 mb-1">⚡ Response Speed:</p>
-                      <p className="text-xs text-blue-800">Instant responses from our knowledge base!</p>
-                      <p className="text-xs font-semibold text-blue-900 mt-2 mb-1">📊 Usage Limit:</p>
-                      <p className="text-xs text-blue-800">10 messages per minute (prevents spam)</p>
-                      <p className="text-xs text-gray-600 mt-2 italic">💬 For complex queries, an admin can take over anytime!</p>
+                    {/* Enhanced Quick Actions - Phase 2 */}
+                    <div className="mt-4 max-w-md mx-auto text-left">
+                      <ChatQuickActions 
+                        onSelectQuestion={(question) => setInputText(question)}
+                        recentTopics={recentTopics}
+                      />
                     </div>
                     
-                    {hasIntelligentKb && (
-                      <div className="mt-4 space-y-2 max-w-xs mx-auto">
-                        <p className="text-xs font-semibold text-gray-700 mb-2">Quick questions:</p>
-                        <button onClick={() => setInputText('What is Wasilah?')} className="w-full text-left px-3 py-2 text-xs bg-white hover:bg-blue-50 rounded-lg border border-gray-200 transition-colors">💡 What is Wasilah?</button>
-                        <button onClick={() => setInputText('How can I volunteer?')} className="w-full text-left px-3 py-2 text-xs bg-white hover:bg-blue-50 rounded-lg border border-gray-200 transition-colors">🙋 How can I volunteer?</button>
-                        <button onClick={() => setInputText('What projects do you run?')} className="w-full text-left px-3 py-2 text-xs bg-white hover:bg-blue-50 rounded-lg border border-gray-200 transition-colors">🎯 What projects do you run?</button>
+                    {/* Capabilities Info - Collapsed */}
+                    <details className="mt-4 max-w-md mx-auto text-left">
+                      <summary className="text-xs text-blue-600 cursor-pointer hover:underline">ℹ️ What I can help with</summary>
+                      <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <ul className="text-xs text-blue-800 space-y-1">
+                          <li>• Information about Wasilah projects & events</li>
+                          <li>• Volunteering opportunities & how to join</li>
+                          <li>• Contact information & office locations</li>
+                          <li>• General questions about our mission</li>
+                        </ul>
+                        <p className="text-xs font-semibold text-blue-900 mt-3 mb-1">⚡ Response Speed:</p>
+                        <p className="text-xs text-blue-800">Instant responses from our knowledge base!</p>
+                        <p className="text-xs text-gray-600 mt-2 italic">💬 For complex queries, an admin can take over anytime!</p>
                       </div>
-                    )}
+                    </details>
                   </div>
                 )}
 
