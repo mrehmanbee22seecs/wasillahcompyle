@@ -85,11 +85,15 @@ const EditableHeader = () => {
               </div>
             </Link>
 
-            {/* FIXED: Desktop Navigation with proper visibility */}
+            {/* FIXED: Desktop Navigation with proper visibility - use path-based check */}
             <div className="hidden lg:flex items-center space-x-2">
-              {navigation.map((item) => (
-                // Hide Dashboard, My Analytics, and Integrations for guests and unauthenticated users
-                ((item.name === 'Dashboard' || item.name === 'My Analytics' || item.name === 'Integrations') && (isGuest || !currentUser)) ? null : (
+              {navigation.map((item) => {
+                // Protected paths that require authentication
+                const protectedPaths = ['/dashboard', '/my-analytics', '/integrations'];
+                const isProtected = protectedPaths.includes(item.href);
+                // Hide protected routes for guests and unauthenticated users
+                if (isProtected && (isGuest || !currentUser)) return null;
+                return (
                   <Link
                     key={item.name}
                     to={item.href}
@@ -101,8 +105,8 @@ const EditableHeader = () => {
                   >
                     {item.name}
                   </Link>
-                )
-              ))}
+                );
+              })}
               {/* Language Switcher - Disabled per user request */}
               {/* <LanguageSwitcher /> */}
               {/* Auth actions in the main menu (desktop) */}
@@ -216,13 +220,17 @@ const EditableHeader = () => {
             </div>
           </div>
 
-          {/* FIXED: Mobile menu with better visibility */}
+          {/* FIXED: Mobile menu with better visibility - use path-based check */}
           {isMenuOpen && (
             <div className="lg:hidden animate-fade-in-down">
               <div className="px-4 pt-4 pb-6 space-y-2 bg-logo-navy-light rounded-2xl mt-4 border-2 border-logo-teal/50 shadow-2xl">
-                {navigation.map((item, index) => (
-                  // Hide Dashboard, My Analytics, and Integrations for guests and unauthenticated users (mobile)
-                  ((item.name === 'Dashboard' || item.name === 'My Analytics' || item.name === 'Integrations') && (isGuest || !currentUser)) ? null : (
+                {navigation.map((item, index) => {
+                  // Protected paths that require authentication
+                  const protectedPaths = ['/dashboard', '/my-analytics', '/integrations'];
+                  const isProtected = protectedPaths.includes(item.href);
+                  // Hide protected routes for guests and unauthenticated users (mobile)
+                  if (isProtected && (isGuest || !currentUser)) return null;
+                  return (
                     <Link
                       key={item.name}
                       to={item.href}
@@ -236,8 +244,8 @@ const EditableHeader = () => {
                     >
                       {item.name}
                     </Link>
-                  )
-                ))}
+                  );
+                })}
 
                 {isAdmin && (
                   <div className="mt-4 pt-4 border-t border-white/20">
