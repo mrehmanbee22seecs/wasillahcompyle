@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { CheckCircle, AlertCircle, TrendingUp, MapPin, Briefcase, Heart, Clock, Star, X } from 'lucide-react';
-import { MatchingFactors } from '../../utils/matchingAlgorithm';
+import { MatchingFactors, MATCHING_WEIGHTS } from '../../utils/matchingAlgorithm';
 
 interface MatchExplanationProps {
   factors: MatchingFactors;
@@ -52,35 +52,35 @@ const MatchExplanation: React.FC<MatchExplanationProps> = ({
     { 
       label: 'Skills Match', 
       score: skillsScore, 
-      max: 35, 
+      max: MATCHING_WEIGHTS.SKILLS_MAX, 
       icon: Briefcase,
       description: 'How well your skills align with project requirements'
     },
     { 
       label: 'Interest Alignment', 
       score: interestsScore, 
-      max: 20, 
+      max: MATCHING_WEIGHTS.INTERESTS_MAX, 
       icon: Heart,
       description: 'Match between your interests and project category'
     },
     { 
       label: 'Location Proximity', 
       score: locationScore, 
-      max: 25, 
+      max: MATCHING_WEIGHTS.LOCATION_MAX, 
       icon: MapPin,
       description: 'Geographic proximity to the project'
     },
     { 
       label: 'Availability', 
       score: availabilityScore, 
-      max: 10, 
+      max: MATCHING_WEIGHTS.AVAILABILITY_MAX, 
       icon: Clock,
       description: 'Timeline compatibility with your schedule'
     },
     { 
       label: 'Experience Level', 
       score: experienceScore, 
-      max: 10, 
+      max: MATCHING_WEIGHTS.EXPERIENCE_MAX, 
       icon: TrendingUp,
       description: 'Your volunteering experience level'
     },

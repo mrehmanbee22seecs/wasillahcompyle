@@ -1,6 +1,16 @@
 import { ProjectSubmission } from '../types/submissions';
 import { UserProfile } from '../types/user';
 
+// Matching score weight constants - single source of truth
+// These are used by both the algorithm and the UI display
+export const MATCHING_WEIGHTS = {
+  SKILLS_MAX: 35,
+  INTERESTS_MAX: 20,
+  LOCATION_MAX: 25,
+  AVAILABILITY_MAX: 10,
+  EXPERIENCE_MAX: 10,
+} as const;
+
 export interface MatchingFactors {
   skillsScore: number;
   interestsScore: number;
@@ -33,13 +43,13 @@ export function calculateMatch(
   const userSkills = userProfile.skills || [];
   const userInterests = userProfile.interests || [];
 
-  // Location (0–25)
+  // Location (0–LOCATION_MAX)
   let locationScore = 0;
   if (userLocation && project.location) {
     const u = userLocation.toLowerCase();
     const p = project.location.toLowerCase();
     if (u === p) {
-      locationScore = 25;
+      locationScore = MATCHING_WEIGHTS.LOCATION_MAX;
       reasons.push('Same city/location');
     } else if (p.includes(u) || u.includes(p)) {
       locationScore = 15;
@@ -49,7 +59,7 @@ export function calculateMatch(
     }
   }
 
-  // Skills (0–35)
+  // Skills (0–SKILLS_MAX)
   const projectSkills = [
     ...(project.requiredSkills || []),
     ...(project.preferredSkills || []),
@@ -61,7 +71,7 @@ export function calculateMatch(
       userSkills.some((u) => u.toLowerCase().includes(s.toLowerCase()) || s.toLowerCase().includes(u.toLowerCase()))
     );
     const ratio = matchingSkills.length / projectSkills.length;
-    skillsScore = Math.min(35, Math.round(ratio * 35));
+    skillsScore = Math.min(MATCHING_WEIGHTS.SKILLS_MAX, Math.round(ratio * MATCHING_WEIGHTS.SKILLS_MAX));
     if (matchingSkills.length) {
       reasons.push(`${matchingSkills.length} skill${matchingSkills.length > 1 ? 's' : ''} match`);
     } else {
@@ -69,7 +79,7 @@ export function calculateMatch(
     }
   }
 
-  // Interests / category (0–20)
+  // Interests / category (0–INTERESTS_MAX)
   let interestsScore = 0;
   if (userInterests.length && project.category) {
     const category = project.category.toLowerCase();
@@ -77,14 +87,14 @@ export function calculateMatch(
       (i) => i.toLowerCase().includes(category) || category.includes(i.toLowerCase())
     );
     if (interestMatch) {
-      interestsScore = 20;
+      interestsScore = MATCHING_WEIGHTS.INTERESTS_MAX;
       reasons.push('Matches your interests/causes');
     } else {
       suggestions.push('Add or update your causes and interests for better topic alignment.');
     }
   }
 
-  // Availability (0–10)
+  // Availability (0–AVAILABILITY_MAX)
   let availabilityScore = 0;
   if (userProfile.availability && project.startDate && project.endDate) {
     const start = new Date(project.startDate);
@@ -97,19 +107,19 @@ export function calculateMatch(
       : null;
 
     if (!userStart || !userEnd || (start >= userStart && end <= userEnd)) {
-      availabilityScore = 10;
+      availabilityScore = MATCHING_WEIGHTS.AVAILABILITY_MAX;
       reasons.push('Fits your availability window');
     } else {
       suggestions.push('Adjust your availability dates to better match project timelines.');
     }
   }
 
-  // Experience (0–10) – heuristic: number of past activities/projects
+  // Experience (0–EXPERIENCE_MAX) – heuristic: number of past activities/projects
   let experienceScore = 0;
   const activityCount = (userProfile.activityLog || []).length;
   if (activityCount > 0) {
     if (activityCount >= 20) {
-      experienceScore = 10;
+      experienceScore = MATCHING_WEIGHTS.EXPERIENCE_MAX;
       reasons.push('Strong volunteering experience');
     } else if (activityCount >= 5) {
       experienceScore = 7;
