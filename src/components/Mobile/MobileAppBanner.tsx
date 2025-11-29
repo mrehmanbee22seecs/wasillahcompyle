@@ -33,14 +33,20 @@ const MobileAppBanner: React.FC<MobileAppBannerProps> = ({
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Check if we're on a mobile device
+    // Check if we're on a mobile device (guard for SSR)
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+      if (typeof window === 'undefined' || typeof navigator === 'undefined') return;
+      const isNarrow = window.innerWidth < 768;
+      const isUA = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent || '');
+      setIsMobile(isNarrow || isUA);
     };
-    
+  
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', checkMobile);
+      return () => window.removeEventListener('resize', checkMobile);
+    }
+    return;
   }, []);
 
   // Check if already dismissed in this session
