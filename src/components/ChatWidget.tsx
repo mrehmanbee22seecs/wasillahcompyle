@@ -21,6 +21,9 @@ interface Message {
 }
 
 const ChatWidget = () => {
+  // Hidden per user request
+  return null;
+  
   const { currentUser } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
