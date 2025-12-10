@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { useSubscription } from '../../contexts/SubscriptionContext';
-import { X, Sparkles, ArrowRight, Check } from 'lucide-react';
+import { X, Sparkles, Check } from 'lucide-react';
 import { QuotaAlert } from '../../types/subscription';
 
 interface UpgradePromptProps {
