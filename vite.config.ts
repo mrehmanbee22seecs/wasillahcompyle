@@ -1,8 +1,35 @@
-import { defineConfig } from 'vite';
+import { defineConfig, Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { visualizer } from 'rollup-plugin-visualizer';
 import compression from 'vite-plugin-compression';
+import fs from 'fs';
+import path from 'path';
+
+// Plugin to replace environment variables in service worker
+function replaceEnvInServiceWorker(): Plugin {
+  return {
+    name: 'replace-env-in-sw',
+    closeBundle() {
+      const swPath = path.resolve(__dirname, 'dist/firebase-messaging-sw.js');
+      if (fs.existsSync(swPath)) {
+        let content = fs.readFileSync(swPath, 'utf-8');
+        
+        // Replace placeholders with actual environment variables
+        content = content
+          .replace('__VITE_FIREBASE_API_KEY__', process.env.VITE_FIREBASE_API_KEY || '')
+          .replace('__VITE_FIREBASE_AUTH_DOMAIN__', process.env.VITE_FIREBASE_AUTH_DOMAIN || '')
+          .replace('__VITE_FIREBASE_PROJECT_ID__', process.env.VITE_FIREBASE_PROJECT_ID || '')
+          .replace('__VITE_FIREBASE_STORAGE_BUCKET__', process.env.VITE_FIREBASE_STORAGE_BUCKET || '')
+          .replace('__VITE_FIREBASE_MESSAGING_SENDER_ID__', process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '')
+          .replace('__VITE_FIREBASE_APP_ID__', process.env.VITE_FIREBASE_APP_ID || '');
+        
+        fs.writeFileSync(swPath, content);
+        console.log('✅ Firebase config injected into service worker');
+      }
+    }
+  };
+}
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -18,6 +45,7 @@ export default defineConfig({
         ],
       },
     }),
+    replaceEnvInServiceWorker(), // Add the plugin to replace env vars in service worker
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['logo.jpeg', 'image.png'],
