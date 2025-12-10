@@ -48,7 +48,6 @@ const EditableHeader = () => {
     { name: t('navigation.events'), href: '/events' },
     { name: t('navigation.volunteer'), href: '/volunteer' },
     { name: t('navigation.contact'), href: '/contact' },
-    { name: t('navigation.upgrade'), href: '/upgrade' },
   ];
 
   return (

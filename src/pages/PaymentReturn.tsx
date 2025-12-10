@@ -152,14 +152,8 @@ const PaymentReturn: React.FC = () => {
             
             <div className="space-y-3">
               <button
-                onClick={() => navigate('/upgrade')}
-                className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors"
-              >
-                Try Again
-              </button>
-              <button
                 onClick={() => navigate('/dashboard')}
-                className="w-full px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors"
               >
                 Back to Dashboard
               </button>

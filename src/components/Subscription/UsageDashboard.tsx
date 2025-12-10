@@ -175,14 +175,7 @@ export const UsageDashboard: React.FC = () => {
               </p>
             )}
           </div>
-          {planConfig.id === 'free' && (
-            <a
-              href="/upgrade"
-              className="px-4 py-2 bg-white text-purple-600 rounded-lg font-medium hover:bg-gray-100 transition-colors"
-            >
-              Upgrade
-            </a>
-          )}
+          {/* Upgrade button removed */}
         </div>
       </div>
 
@@ -214,17 +207,10 @@ export const UsageDashboard: React.FC = () => {
                     You've used {alert.current} of {alert.limit}{' '}
                     {alert.resource === 'projects' ? 'projects' : 'events'}. 
                     {alert.type === 'limit_reached' && planConfig.id === 'free' && (
-                      <> Upgrade to Premium for unlimited access.</>
+                      <> Contact support for more access.</>
                     )}
                   </p>
-                  {alert.type === 'limit_reached' && planConfig.id === 'free' && (
-                    <a
-                      href="/upgrade"
-                      className="inline-block mt-2 text-sm font-medium text-purple-600 dark:text-purple-400 hover:underline"
-                    >
-                      Upgrade Now →
-                    </a>
-                  )}
+                  {/* Upgrade link removed */}
                 </div>
               </div>
             </div>

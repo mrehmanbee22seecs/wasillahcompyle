@@ -155,19 +155,13 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-3">
-          <a
-            href="/upgrade"
-            className="flex-1 flex items-center justify-center px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl"
-          >
-            Upgrade Now
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </a>
+          {/* Upgrade button removed */}
           {onClose && (
             <button
               onClick={onClose}
               className="flex-1 px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
-              Maybe Later
+              Close
             </button>
           )}
         </div>
@@ -211,15 +205,10 @@ export const CompactUpgradePrompt: React.FC<{
       <div className="flex items-center">
         <Sparkles className="w-5 h-5 mr-3" />
         <span className="font-medium">
-          {message || 'Upgrade to Premium for unlimited access'}
+          {message || 'Contact support for more access'}
         </span>
       </div>
-      <a
-        href="/upgrade"
-        className="px-4 py-2 bg-white text-purple-600 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors"
-      >
-        Upgrade
-      </a>
+      {/* Upgrade button removed */}
     </div>
   );
 };

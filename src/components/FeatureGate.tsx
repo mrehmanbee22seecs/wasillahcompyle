@@ -50,15 +50,7 @@ export const FeatureGate: React.FC<FeatureGateProps> = ({
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               Upgrade to {planConfig.displayName} to unlock this feature
             </p>
-            <button
-              onClick={() => {
-                // Navigate to pricing/upgrade page
-                window.location.href = '/upgrade';
-              }}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-            >
-              Upgrade Now
-            </button>
+            {/* Upgrade button removed */}
           </div>
         </div>
       </div>
