@@ -214,7 +214,7 @@ export const PlanSelector: React.FC<PlanSelectorProps> = ({
           All plans include access to our community and knowledge base
         </p>
         <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-          Secure payment processing via JazzCash
+          Secure payment processing
         </p>
       </div>
 

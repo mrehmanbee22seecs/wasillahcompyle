@@ -5,7 +5,7 @@
 
 export type DonationFrequency = 'one-time' | 'monthly' | 'quarterly' | 'yearly';
 export type DonationStatus = 'pending' | 'completed' | 'failed' | 'refunded';
-export type PaymentMethod = 'easypaisa' | 'jazzcash' | 'bank_transfer' | 'card';
+export type PaymentMethod = 'easypaisa' | 'bank_transfer' | 'card';
 
 export interface DonationRecord {
   id: string;

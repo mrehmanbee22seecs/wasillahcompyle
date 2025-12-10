@@ -6,8 +6,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { CreditCard, Shield, ArrowRight, Loader2, Check } from 'lucide-react';
-import { initiateJazzCashPayment } from '../../services/jazzCashPaymentService';
+import { CreditCard, Shield, Loader2 } from 'lucide-react';
 import { SubscriptionPlan } from '../../types/subscription';
 
 interface PaymentCheckoutProps {
@@ -40,21 +39,9 @@ export const PaymentCheckout: React.FC<PaymentCheckoutProps> = ({
     setError(null);
 
     try {
-      const paymentIntent = await initiateJazzCashPayment({
-        amount,
-        currency,
-        userId: currentUser.uid,
-        type: 'subscription',
-        subscriptionPlan: plan,
-        description: `Subscription upgrade to ${plan} plan`,
-        metadata: {
-          planId: plan,
-          userEmail: currentUser.email,
-        },
-      });
-
-      // Redirect to JazzCash payment page
-      window.location.href = paymentIntent.paymentUrl;
+      // Payment processing will be implemented when payment gateway is configured
+      setError('Payment gateway not configured. Please contact support to upgrade your subscription.');
+      setProcessing(false);
       
     } catch (err) {
       console.error('Payment error:', err);
@@ -120,22 +107,14 @@ export const PaymentCheckout: React.FC<PaymentCheckoutProps> = ({
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Payment Method
           </h3>
-          <div className="border-2 border-purple-500 rounded-lg p-4 bg-purple-50 dark:bg-purple-900/10">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center mr-4">
-                  <span className="text-2xl font-bold text-purple-600">JC</span>
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900 dark:text-white">
-                    JazzCash
-                  </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Mobile Wallet & Cards
-                  </p>
-                </div>
-              </div>
-              <Check className="w-6 h-6 text-purple-600" />
+          <div className="border-2 border-gray-300 rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
+            <div className="text-center py-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Payment gateway integration coming soon
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
+                Please contact support to upgrade your subscription
+              </p>
             </div>
           </div>
         </div>
@@ -149,7 +128,7 @@ export const PaymentCheckout: React.FC<PaymentCheckoutProps> = ({
                 Secure Payment
               </p>
               <p className="text-sm text-blue-700 dark:text-blue-300">
-                Your payment is processed securely through JazzCash's encrypted gateway.
+                All payments will be processed securely through our encrypted gateway.
                 We never store your payment information.
               </p>
             </div>

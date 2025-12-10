@@ -75,16 +75,6 @@ export const DonationForm: React.FC<DonationFormProps> = ({
       },
     },
     {
-      id: 'jazzcash',
-      name: 'JazzCash',
-      icon: Smartphone,
-      color: 'bg-orange-600',
-      accountInfo: {
-        number: '03349682146',
-        title: 'Wasilah Foundation',
-      },
-    },
-    {
       id: 'bank_transfer',
       name: 'Bank Transfer',
       icon: Building2,

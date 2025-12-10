@@ -117,7 +117,7 @@ const Upgrade: React.FC = () => {
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
                 We're working to integrate Pakistan-friendly payment methods including 
-                JazzCash, EasyPaisa, and local bank transfers. International cards will 
+                EasyPaisa and local bank transfers. International cards will 
                 also be supported.
               </p>
             </div>
