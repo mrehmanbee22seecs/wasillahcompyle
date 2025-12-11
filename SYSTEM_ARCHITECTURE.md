@@ -1353,3 +1353,841 @@ src/
 
 ---
 
+
+### 9. DASHBOARD (`/dashboard`)
+**Component**: `Dashboard.tsx` (Router component)  
+**Access**: Authenticated users only  
+**Purpose**: Personalized dashboard based on user role
+
+**Role-Based Routing**:
+- Volunteer role → `VolunteerDashboard.tsx`
+- Student role → `StudentDashboard.tsx`
+- NGO role → `NGODashboard.tsx`
+- Admin/Default → Original `Dashboard.tsx`
+
+---
+
+#### 9A. STUDENT DASHBOARD
+**Component**: `StudentDashboard.tsx`  
+**Access**: Users with role='student'
+
+##### Section 1: Welcome Header
+- **Greeting**: "Welcome back, [Name]!"
+- **Profile Completion**: Progress bar (e.g., "85% complete")
+- **Quick Actions Row**:
+  - Browse Projects button
+  - My Applications button
+  - Update Profile button
+  - View Achievements button
+
+##### Section 2: Quick Stats Cards
+**Four Stat Cards (Grid)**:
+1. **Applications Submitted**
+   - Icon: FileText
+   - Count: Number
+   - Trend: "+2 this month"
+2. **Hours Volunteered**
+   - Icon: Clock
+   - Count: Total hours
+   - Goal progress bar
+3. **Projects Joined**
+   - Icon: Target
+   - Count: Active + completed
+   - Badge count
+4. **Impact Score**
+   - Icon: Award
+   - Score out of 1000
+   - Leaderboard rank
+
+##### Section 3: My Applications
+**Table/Card View**:
+- **Filters**: All, Pending, Accepted, Rejected
+- **Application Items**:
+  - Project name
+  - NGO name
+  - Status badge (color-coded)
+  - Applied date
+  - Action buttons:
+    - View details
+    - Edit (if pending)
+    - Withdraw
+    - Contact NGO
+- **Empty State**: "No applications yet - Browse projects to get started!"
+- **Pagination**: 5 per page
+
+##### Section 4: Recommended Projects
+**Component**: `RecommendedProjects.tsx`
+- **Smart Matching**: Based on:
+  - Skills in profile
+  - Location
+  - Previous applications
+  - Interests
+- **Project Cards**: Horizontal scrollable
+  - Match score badge (e.g., "92% match")
+  - Quick apply button
+  - Save for later
+- **Algorithm**: ML-based or rule-based matching
+
+##### Section 5: Upcoming Events & Deadlines
+**Timeline View**:
+- **Registered Events**: Events user signed up for
+- **Application Deadlines**: Projects closing soon
+- **Event Reminders**: Upcoming event notifications
+- **Calendar Integration**: Link to full calendar
+
+##### Section 6: Tasks & Checklist
+**Component**: `TaskChecklist.tsx`
+- **Personal Tasks**:
+  - Complete profile
+  - Upload documents
+  - Submit timesheet
+  - Write review
+- **Checkbox Items**: Check off when done
+- **Add Custom Task**: "+ New Task" button
+- **Task Categories**: Profile, Applications, Follow-ups
+
+##### Section 7: Personal Notes
+**Component**: `PersonalNotes.tsx`
+- **Notes Section**: Text area for personal notes
+- **Rich Text Editor**: Basic formatting
+- **Auto-save**: Saves to Firestore
+- **Categories/Tags**: Organize notes
+- **Search Notes**: Find specific notes
+
+##### Section 8: Achievements & Badges
+**Component**: Badge display from `Gamification/`
+- **Badge Grid**: Visual badge display
+- **Progress Bars**: Towards next badges
+- **Categories**:
+  - Participation badges
+  - Milestone badges
+  - Skill badges
+  - Special awards
+- **Badge Details**: Click to see how to earn
+
+##### Section 9: Activity Feed
+- **Recent Activities**:
+  - Application submitted
+  - Project completed
+  - Badge earned
+  - Review given
+- **Timestamp**: Relative time (e.g., "2 hours ago")
+- **Activity Icons**: Visual indicators
+
+##### Section 10: Subscription Status
+**If Applicable**:
+- Current plan card
+- Usage metrics
+- Features available
+- Upgrade prompt (hidden per requirements)
+
+**Features**:
+- ✅ Real-time application status updates
+- ✅ Personalized recommendations
+- ✅ Task management
+- ✅ Notes auto-save
+- ✅ Achievement tracking
+- ✅ Responsive design
+
+---
+
+#### 9B. VOLUNTEER DASHBOARD
+**Component**: `VolunteerDashboard.tsx`  
+**Similar to Student Dashboard with additions**:
+- **Volunteer-specific Stats**:
+  - Total volunteer hours
+  - Organizations worked with
+  - Certifications earned
+- **Volunteer Log**: Track hours and activities
+- **Skill Development**: Track skills gained
+- **References**: Manage reference requests
+
+---
+
+#### 9C. NGO DASHBOARD
+**Component**: `NGODashboard.tsx`  
+**Access**: Users with role='ngo'  
+**Purpose**: Comprehensive NGO management interface
+
+##### Section 1: NGO Overview Header
+- **NGO Name & Logo**
+- **Verification Status**: Badge if verified
+- **Quick Actions**:
+  - Create Project button
+  - Create Event button
+  - View Profile button
+  - Settings button
+
+##### Section 2: Key Metrics Dashboard
+**Stat Cards (Grid of 6)**:
+1. **Total Projects**
+   - Active + Completed count
+   - Trend graph
+2. **Active Volunteers**
+   - Currently engaged count
+   - Breakdown by project
+3. **Applications Pending**
+   - Requires action count
+   - Notification badge
+4. **Events This Month**
+   - Upcoming events
+   - Total attendees
+5. **Total Impact**
+   - Lives impacted
+   - Hours contributed
+6. **Subscription Status**
+   - Plan tier
+   - Usage percentage
+
+##### Section 3: Applications Management
+**Component**: Application review table
+- **Filters**:
+  - All Applications
+  - Pending Review
+  - Accepted
+  - Rejected
+- **Sort Options**:
+  - By date (newest first)
+  - By project
+  - By applicant rating
+- **Application Row**:
+  - Applicant photo
+  - Name with profile link
+  - Applied for project
+  - Application date
+  - Skills match indicator
+  - Action buttons:
+    - View Full Application
+    - Accept
+    - Reject
+    - Request Interview
+    - Message Applicant
+- **Bulk Actions**:
+  - Select multiple
+  - Accept all selected
+  - Reject all selected
+- **Application Detail Modal**:
+  - Full application form data
+  - Applicant profile summary
+  - Previous volunteer history
+  - References
+  - Documents uploaded
+  - Internal notes field
+  - Decision buttons
+
+##### Section 4: Project Management
+**Component**: Project CRUD interface
+- **Projects Table**:
+  - Project name
+  - Status (Draft, Active, Closed, Completed)
+  - Applications count
+  - Volunteers joined
+  - Start date
+  - Actions: Edit, View, Archive, Duplicate
+- **Filters**: By status, date, category
+- **Quick Actions Per Project**:
+  - Edit project
+  - Manage volunteers
+  - View applications
+  - Generate report
+  - Mark as complete
+- **Create New Project**: "+ New Project" button → `CreateSubmission` page
+
+##### Section 5: Volunteer Management
+**Active Volunteers CRM**:
+- **Volunteer List**:
+  - Photo and name
+  - Project assigned
+  - Hours contributed
+  - Performance rating
+  - Contact info
+  - Actions:
+    - View profile
+    - Send message
+    - Issue certificate
+    - Give feedback
+    - Remove from project
+- **Filters**: By project, by status, by skills
+- **Search**: Find specific volunteers
+- **Bulk Operations**:
+  - Send group message
+  - Issue certificates
+  - Export list
+
+##### Section 6: Event Management
+**Upcoming Events Section**:
+- **Event Cards**:
+  - Event name and date
+  - Registrations count vs. capacity
+  - Status indicator
+  - Actions:
+    - View details
+    - Edit event
+    - View attendees
+    - Send updates
+    - Check-in tool
+- **Create Event**: "+ New Event" button
+
+##### Section 7: Analytics & Reports
+**Component**: `NGOAnalytics.tsx`
+- **Charts**:
+  - Volunteer growth over time (line chart)
+  - Projects by category (pie chart)
+  - Application conversion rate (funnel)
+  - Volunteer engagement (bar chart)
+- **Key Insights**:
+  - Most popular projects
+  - Best performing categories
+  - Peak application times
+  - Volunteer retention rate
+- **Export Reports**:
+  - PDF download
+  - Excel export
+  - Custom date ranges
+  - Scheduled reports (email)
+
+##### Section 8: Donations Tracking
+**If Donation Feature Enabled**:
+- **Donation Summary**: Total donations received
+- **Recent Donors**: List with amounts
+- **Campaigns**: Active fundraising campaigns
+- **Link**: "Manage Donations" → `/donations/manage`
+
+##### Section 9: Communication Center
+- **Inbox**: Messages from volunteers/applicants
+- **Announcements**: Broadcast to volunteers
+- **Templates**: Message templates
+- **Email Campaigns**: Newsletter management
+
+##### Section 10: Subscription & Limits
+**Component**: `UsageDashboard.tsx`
+- **Current Plan**: Free/Premium/Professional
+- **Usage Metrics**:
+  - Projects created: 5/10
+  - Volunteers managed: 45/100
+  - Storage used: 250 MB/1 GB
+- **Progress Bars**: Visual usage indicators
+- **Features List**: What's included in plan
+- **Contact Support**: For plan-related questions (upgrade removed)
+
+##### Section 11: Quick Links
+- **Profile Settings**
+- **Team Management**: Add team members
+- **Verification**: Submit for verification
+- **Help & Support**: Documentation
+- **Feedback**: Share feedback
+
+**Features**:
+- ✅ Comprehensive project lifecycle management
+- ✅ Application review workflow
+- ✅ Volunteer CRM
+- ✅ Event management tools
+- ✅ Analytics dashboard
+- ✅ Communication tools
+- ✅ Batch operations
+- ✅ Report generation
+- ✅ Real-time notifications
+- ✅ Usage tracking
+
+---
+
+### 10. CREATE SUBMISSION (`/create-submission`)
+**Component**: `CreateSubmission.tsx`  
+**Access**: Authenticated NGO users  
+**Purpose**: Create new projects or events
+
+#### Step 1: Submission Type Selection
+- **Radio Buttons / Cards**:
+  - Project Submission
+  - Event Submission
+- **Icons**: Visual differentiation
+- **Description**: What each submission type is for
+- **Next Button**: Proceed to form
+
+#### Step 2: Basic Information (All Submissions)
+**Form Fields**:
+- **Title**: Text input (required)
+  - Character limit: 100
+  - Placeholder: "Give your project/event a compelling title"
+- **Category**: Dropdown (required)
+  - Education
+  - Healthcare
+  - Environment
+  - Community Development
+  - Women Empowerment
+  - Youth Programs
+  - Disaster Relief
+- **Short Description**: Textarea (required)
+  - 200 characters max
+  - For preview cards
+- **Cover Image**: Image upload (required)
+  - Drag & drop interface
+  - Crop tool
+  - Aspect ratio: 16:9
+  - Cloudinary integration
+  - Max size: 5MB
+
+#### Step 3: Project-Specific Fields
+**If Project**:
+- **Detailed Description**: Rich text editor
+  - TipTap integration
+  - Formatting tools
+  - Image insertion
+  - Link insertion
+  - Lists, headers, etc.
+- **Goals & Objectives**: Textarea
+- **Expected Impact**: Text area
+- **Start Date**: Date picker
+- **End Date**: Date picker (optional for ongoing)
+- **Duration**: Auto-calculated or manual input
+- **Location**: 
+  - City dropdown
+  - Province dropdown
+  - Specific address (optional)
+  - Map picker component
+- **Volunteers Needed**: Number input
+  - Minimum
+  - Maximum (optional)
+- **Time Commitment**:
+  - Hours per week
+  - Flexible schedule checkbox
+- **Required Skills**: Multi-select
+  - Predefined skills list
+  - Add custom skill
+- **Requirements**:
+  - Age minimum
+  - Education level
+  - Background check needed
+  - Other requirements (textarea)
+- **What Volunteers Will Do**: Rich text
+- **What We Provide**:
+  - Training checkbox
+  - Meals checkbox
+  - Transport checkbox
+  - Certificate checkbox
+  - Other (text input)
+
+#### Step 4: Event-Specific Fields
+**If Event**:
+- **Event Description**: Rich text editor
+- **Event Type**:
+  - Workshop
+  - Fundraiser
+  - Training
+  - Conference
+  - Social Gathering
+- **Date & Time**:
+  - Start date & time picker
+  - End date & time picker
+  - Time zone selector
+- **Location**:
+  - Venue name
+  - Address
+  - Map picker
+  - Virtual option:
+    - Platform (Zoom, Google Meet)
+    - Meeting link (for attendees)
+- **Capacity**: Number of attendees
+- **Registration Deadline**: Date picker
+- **Cost**:
+  - Free option
+  - Paid: Price input
+  - What's included
+- **Agenda**: Timeline editor
+  - Time slot
+  - Activity
+  - Speaker/facilitator
+  - Add/remove rows
+- **Speakers/Facilitators**:
+  - Name
+  - Title
+  - Bio
+  - Photo upload
+  - Add multiple
+- **What Attendees Get**:
+  - Certificate
+  - Materials
+  - Meals
+  - Other
+
+#### Step 5: Additional Details
+**For Both Types**:
+- **Tags**: Searchable keywords (multi-input)
+- **Contact Person**:
+  - Name
+  - Email
+  - Phone
+- **Additional Images**: Gallery upload
+  - Multiple image upload
+  - Reorder images
+  - Set as cover option
+- **Documents**: PDF/Doc upload
+  - Project briefs
+  - Guidelines
+  - Terms & conditions
+- **Application Questions**: Custom questions
+  - Add custom question
+  - Question type (text, multiple choice, yes/no)
+  - Required/optional
+
+#### Step 6: Preview & Settings
+**Preview Tab**:
+- **Live Preview**: See how it will look
+- **Mobile Preview**: Toggle to mobile view
+- **Edit**: Go back to any section
+
+**Settings Tab**:
+- **Visibility**:
+  - Public (visible to all)
+  - Unlisted (only via link)
+  - Draft (not published)
+- **Application Settings**:
+  - Auto-accept (if enabled)
+  - Screening questions required
+  - Approval workflow
+- **Notification Settings**:
+  - Email on new application
+  - Email on event registration
+  - Daily digest
+- **Featured**: Request to be featured (premium feature)
+
+#### Step 7: Submit
+**Submission Options**:
+- **Save as Draft**: Save without publishing
+  - Stored in Firestore with status='draft'
+  - Can resume editing later
+  - Auto-save every 30 seconds
+- **Submit for Review**: Send to admin review
+  - Status='pending'
+  - Admin approves/rejects
+  - Get notification on decision
+- **Publish Immediately**: Goes live (if no review required)
+  - Status='active'
+  - Visible on projects/events page
+
+**Post-Submission**:
+- **Success Message**: "Your submission has been created!"
+- **Next Steps**:
+  - View submission
+  - Share on social media
+  - Edit submission
+  - Return to dashboard
+
+**Draft Management**:
+**Component**: `DraftsList.tsx`
+- **Drafts Section**: Access from dashboard
+- **Draft Cards**:
+  - Title
+  - Type (Project/Event)
+  - Last edited
+  - Completion percentage
+  - Actions:
+    - Continue editing
+    - Duplicate
+    - Delete
+- **Auto-save Indicator**: "All changes saved" / "Saving..."
+
+**Features**:
+- ✅ Multi-step form wizard
+- ✅ Progress indicator
+- ✅ Form validation per step
+- ✅ Auto-save drafts
+- ✅ Rich text editing
+- ✅ Image upload & cropping
+- ✅ Map integration
+- ✅ Preview mode
+- ✅ Mobile responsive
+- ✅ Accessibility features
+
+---
+
+### 11. MY APPLICATIONS (`/my-applications`)
+**Component**: `MyApplications.tsx`  
+**Access**: Authenticated students/volunteers  
+**Purpose**: Track and manage submitted applications
+
+#### Section 1: Page Header
+- **Title**: "My Applications"
+- **Filters Bar**:
+  - All Applications
+  - Pending (badge with count)
+  - Accepted (badge with count)
+  - Rejected
+  - Withdrawn
+- **Search**: Search by project name
+- **Sort**: By date, by status
+
+#### Section 2: Application Cards/List
+**Application Card**:
+- **Left Section**: Project thumbnail
+- **Middle Section**:
+  - Project title
+  - NGO name with logo
+  - Category badge
+  - Location
+- **Right Section**:
+  - Status badge (color-coded):
+    - Pending: Yellow
+    - Accepted: Green
+    - Rejected: Red
+    - Under Review: Blue
+    - Withdrawn: Gray
+  - Applied date: "Applied 3 days ago"
+  - Action buttons:
+    - View Details
+    - Edit Application (if pending)
+    - Withdraw Application
+    - Contact NGO
+    - Reapply (if rejected with permission)
+
+#### Section 3: Application Detail View
+**Modal/Drawer** when clicking "View Details":
+- **Application Summary**:
+  - Project details recap
+  - Your submitted information
+  - Application date and time
+  - Application ID
+- **Status Timeline**:
+  - Submitted: Date & time
+  - Under Review: Date & time (if applicable)
+  - Decision: Date & time (if decided)
+  - Next steps
+- **Your Application**:
+  - All form fields you submitted
+  - Uploaded documents (view/download)
+  - References provided
+- **Communication Thread**:
+  - Messages from NGO
+  - Your replies
+  - Message composer
+- **Actions**:
+  - Print application
+  - Download PDF
+  - Withdraw (if pending)
+  - Edit (if pending and allowed)
+
+#### Section 4: Application Actions
+**Withdraw Application**:
+- Confirmation modal: "Are you sure?"
+- Reason for withdrawal (optional)
+- Confirm button
+- Updates status to 'withdrawn'
+
+**Edit Application** (if pending):
+- Reopens application form
+- Pre-filled with existing data
+- Can modify fields
+- Resubmit button
+- Notification to NGO about update
+
+**Contact NGO**:
+- Opens messaging interface
+- Pre-filled subject: "Regarding [Project Name] Application"
+- Message composer
+- Send button
+
+#### Section 5: Statistics
+**Summary Cards** (Top of page):
+- **Total Applications**: Count
+- **Pending Review**: Count
+- **Accepted**: Count with success rate %
+- **Active Projects**: Currently volunteering
+
+#### Section 6: Recommended Actions
+**Based on Application Status**:
+- **If Pending**: "While you wait, browse more opportunities"
+- **If Accepted**: "View your upcoming project schedule"
+- **If Rejected**: "Don't give up! Check out similar projects"
+- **If No Applications**: "Start browsing projects to apply"
+
+#### Section 7: Empty States
+**No Applications Yet**:
+- Illustration
+- "You haven't applied to any projects yet"
+- "Browse Projects" button
+- Tips for successful applications
+
+**No Results for Filter**:
+- "No [status] applications"
+- "Clear filter" button
+- Browse other statuses
+
+**Features**:
+- ✅ Real-time status updates
+- ✅ Status timeline tracking
+- ✅ In-app messaging with NGOs
+- ✅ Application history
+- ✅ Withdraw functionality
+- ✅ Edit pending applications
+- ✅ Document viewer
+- ✅ Email notifications on status change
+- ✅ Export application data
+
+---
+
+### 12. REMINDERS (`/reminders`)
+**Component**: `Reminders.tsx`  
+**Access**: Authenticated users  
+**Purpose**: Manage personal reminders
+
+#### Section 1: Page Header
+- **Title**: "My Reminders"
+- **Create Button**: "+ New Reminder"
+- **View Toggle**: List / Calendar view
+
+#### Section 2: Reminder Manager
+**Component**: `ReminderManager.tsx`
+
+**Reminder List View**:
+- **Upcoming Reminders**: Sorted by date
+- **Past Reminders**: Completed/expired
+- **Recurring Reminders**: Separate section
+
+**Reminder Card**:
+- **Checkbox**: Mark as complete
+- **Title**: Reminder text
+- **Date & Time**: When it triggers
+- **Notification Method**: Icons for email/push
+- **Recurrence**: If recurring, show pattern
+- **Actions**:
+  - Edit reminder
+  - Delete reminder
+  - Snooze (postpone)
+  - Mark complete
+
+#### Section 3: Create/Edit Reminder Form
+**Component**: `ReminderForm.tsx`
+
+**Form Fields**:
+- **Title**: What to remind about (required)
+  - Placeholder: "Submit project report"
+- **Description**: Additional details (optional)
+- **Date**: Date picker (required)
+- **Time**: Time picker (required)
+- **Recurrence** (optional):
+  - Does not repeat
+  - Daily
+  - Weekly (select days)
+  - Monthly (select date)
+  - Custom
+- **Notification Preferences**:
+  - Email notification
+  - Push notification
+  - SMS (if configured)
+- **Remind Before**:
+  - At time of event
+  - 15 minutes before
+  - 1 hour before
+  - 1 day before
+  - Custom
+- **Priority**:
+  - High (red flag)
+  - Medium (yellow flag)
+  - Low (gray flag)
+- **Category** (optional):
+  - Personal
+  - Volunteer work
+  - Application deadline
+  - Event
+  - Follow-up
+- **Save Button**: Create/Update reminder
+
+#### Section 4: Calendar View
+**Full Calendar Interface**:
+- Month view
+- Week view  
+- Day view
+- Reminders shown on dates
+- Click date to add reminder
+- Click reminder to view/edit
+
+#### Section 5: Reminder Actions
+**Snooze Feature**:
+- Snooze for 10 minutes
+- Snooze for 1 hour
+- Snooze for 1 day
+- Custom snooze time
+
+**Complete Reminder**:
+- Check box to mark done
+- Moves to completed list
+- Option to delete after completion
+
+**Delete Reminder**:
+- Confirmation dialog
+- If recurring, option to delete:
+  - This occurrence only
+  - All future occurrences
+  - All occurrences
+
+#### Section 6: Notification System
+**Email Reminders** (via Resend):
+- Scheduled email at reminder time
+- Template with reminder details
+- Link back to platform
+
+**Push Notifications** (via Firebase Cloud Messaging):
+- Browser notification
+- Mobile app notification (if applicable)
+- Click to open reminder
+
+**Reminder Queue**:
+- Backend Cloud Function checks every minute
+- Sends due reminders
+- Updates reminder status
+- Handles recurring logic
+
+#### Section 7: Integrations
+**Calendar Export**:
+- Export to iCal format
+- Import into Google Calendar
+- Import into Apple Calendar
+- Sync option (one-way)
+
+**Quick Add**:
+- Natural language input: "Remind me tomorrow at 3pm to call John"
+- Parses and creates reminder
+
+**Features**:
+- ✅ Email reminders (Resend integration)
+- ✅ Push notifications
+- ✅ Recurring reminders
+- ✅ Calendar views
+- ✅ Snooze functionality
+- ✅ Priority levels
+- ✅ Categories
+- ✅ Natural language input
+- ✅ iCal export
+- ✅ Mobile responsive
+
+**Data Model**:
+```typescript
+interface Reminder {
+  id: string;
+  userId: string;
+  title: string;
+  description?: string;
+  dateTime: Timestamp;
+  recurrence?: {
+    pattern: 'daily' | 'weekly' | 'monthly' | 'custom';
+    endDate?: Timestamp;
+    daysOfWeek?: number[]; // For weekly
+    dayOfMonth?: number; // For monthly
+  };
+  notifications: {
+    email: boolean;
+    push: boolean;
+    sms?: boolean;
+  };
+  remindBefore: number; // minutes
+  priority: 'high' | 'medium' | 'low';
+  category?: string;
+  completed: boolean;
+  completedAt?: Timestamp;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+```
+
+---
+
