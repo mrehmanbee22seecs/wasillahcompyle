@@ -284,20 +284,7 @@ const NGODashboard = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  {planConfig.id === 'free' && (
-                    <Link
-                      to="/upgrade"
-                      className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg"
-                    >
-                      Upgrade
-                    </Link>
-                  )}
-                  <Link
-                    to="/upgrade"
-                    className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                  >
-                    Manage
-                  </Link>
+                  {/* Upgrade links removed */}
                 </div>
               </div>
 

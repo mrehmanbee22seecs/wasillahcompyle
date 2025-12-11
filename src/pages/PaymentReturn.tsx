@@ -1,14 +1,12 @@
 /**
  * Payment Return Page
- * Handles return from JazzCash payment gateway
+ * Handles return from payment gateway
  */
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { CheckCircle, XCircle, Loader2, ArrowRight } from 'lucide-react';
-import { verifyJazzCashPayment, getPaymentTransaction } from '../services/jazzCashPaymentService';
+import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { useSubscription } from '../contexts/SubscriptionContext';
-import { JazzCashPaymentResponse } from '../types/payment';
 
 const PaymentReturn: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -24,36 +22,13 @@ const PaymentReturn: React.FC = () => {
 
   const handlePaymentReturn = async () => {
     try {
-      // Get all parameters from URL
-      const params: Partial<JazzCashPaymentResponse> = {
-        pp_Version: searchParams.get('pp_Version') || '',
-        pp_TxnType: searchParams.get('pp_TxnType') || '',
-        pp_Language: searchParams.get('pp_Language') || '',
-        pp_MerchantID: searchParams.get('pp_MerchantID') || '',
-        pp_TxnRefNo: searchParams.get('pp_TxnRefNo') || '',
-        pp_Amount: searchParams.get('pp_Amount') || '',
-        pp_TxnCurrency: searchParams.get('pp_TxnCurrency') || '',
-        pp_TxnDateTime: searchParams.get('pp_TxnDateTime') || '',
-        pp_BillReference: searchParams.get('pp_BillReference') || '',
-        pp_Description: searchParams.get('pp_Description') || '',
-        pp_ReturnURL: searchParams.get('pp_ReturnURL') || '',
-        pp_SecureHash: searchParams.get('pp_SecureHash') || '',
-        pp_ResponseCode: searchParams.get('pp_ResponseCode') || '',
-        pp_ResponseMessage: searchParams.get('pp_ResponseMessage') || '',
-      };
-
-      // Verify the payment
-      const isValid = await verifyJazzCashPayment(params as JazzCashPaymentResponse);
+      // Get transaction reference from URL
+      const txnRef = searchParams.get('txn_ref');
+      const statusParam = searchParams.get('status');
       
-      if (isValid && params.pp_ResponseCode === '000') {
+      if (statusParam === 'success' && txnRef) {
         setStatus('success');
         setMessage('Payment successful! Your subscription has been activated.');
-        
-        // Get transaction details
-        if (params.pp_BillReference) {
-          const transaction = await getPaymentTransaction(params.pp_BillReference);
-          setTransactionDetails(transaction);
-        }
         
         // Refresh subscription data
         await refreshSubscription();
@@ -152,14 +127,8 @@ const PaymentReturn: React.FC = () => {
             
             <div className="space-y-3">
               <button
-                onClick={() => navigate('/upgrade')}
-                className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors"
-              >
-                Try Again
-              </button>
-              <button
                 onClick={() => navigate('/dashboard')}
-                className="w-full px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors"
               >
                 Back to Dashboard
               </button>

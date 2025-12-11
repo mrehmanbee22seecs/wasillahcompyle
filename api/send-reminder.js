@@ -23,7 +23,10 @@ if (!getApps().length) {
 const db = getFirestore();
 
 // Initialize Resend
-const RESEND_API_KEY = process.env.RESEND_API_KEY || 're_TWHg3zaz_7KQnXVULcpgG57GtJxohNxve';
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+if (!RESEND_API_KEY) {
+  throw new Error('RESEND_API_KEY environment variable is required');
+}
 const resend = new Resend(RESEND_API_KEY);
 
 const SENDER_EMAIL = process.env.RESEND_SENDER_EMAIL || 'noreply@wasillah.live';

@@ -24,7 +24,7 @@ import AdminKbManager from './pages/AdminKbManager';
 import MyApplications from './pages/MyApplications';
 import NGOPersonal from './pages/NGOPersonal';
 import UserProfilePage from './pages/UserProfile';
-import Upgrade from './pages/Upgrade';
+
 import PaymentReturn from './pages/PaymentReturn';
 import DonationManagement from './pages/DonationManagement';
 import MyDonations from './pages/MyDonations';
@@ -84,7 +84,7 @@ const AppContent = () => {
           <Route path="/ngo/profile" element={<NGOPersonal />} />
           <Route path="/ngo/:ngoId" element={<NGOPersonal />} />
           <Route path="/u/:userId" element={<UserProfilePage />} />
-          <Route path="/upgrade" element={<Upgrade />} />
+
           <Route path="/payment/return" element={<PaymentReturn />} />
           <Route path="/donations/manage" element={<DonationManagement />} />
           <Route path="/donations/my" element={<MyDonations />} />

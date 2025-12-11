@@ -3,6 +3,9 @@ import { Heart, X, CreditCard, Smartphone } from 'lucide-react';
 import DonationForm from './Donation/DonationForm';
 
 const DonationWidget = () => {
+  // Hidden per user request
+  return null;
+  
   const [isOpen, setIsOpen] = useState(false);
   const [suppressButton, setSuppressButton] = useState(false);
   const [showForm, setShowForm] = useState(false);
